@@ -18,5 +18,5 @@ This meta information is then used to optimize memory allocation and usage.
 
 ## Resources
 - [Netcdf specification (incl. BNF)](https://cluster.earlham.edu/bccd-ng/testing/mobeen/GALAXSEEHPC/netcdf-4.1.3/man4/netcdf.html#File-Format)
-- [Official Tutorial for nom (possibly up-to-date)](https://blog.logrocket.com/parsing-in-rust-with-nom/)
+- [Official Tutorial for nom (possibly up-to-date)](https://github.com/Geal/nom/tree/master/doc)
 - [Tutorial for nom (possibly old)](https://blog.logrocket.com/parsing-in-rust-with-nom/)
