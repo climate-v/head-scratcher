@@ -13,7 +13,7 @@ This meta information is then used to optimize memory allocation and usage.
   - [ ] Size
   - [ ] Offset
   - [ ] Datatype
-  - [ ] Dimensionlist
+  - [ ] List of coordinates
   - [ ] is_coordinate
 
 ## Resources
