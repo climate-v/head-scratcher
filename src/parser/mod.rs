@@ -14,6 +14,7 @@ pub enum NumberOfRecords {
 
 /// Length of record dimension
 pub fn number_of_records(i: &[u8]) -> IResult<&[u8], NumberOfRecords, HSE<&[u8]>> {
+    // netCDF3 uses big endian, netCDF4 needs to be checked
     let (i, o) = u32(nom::number::Endianness::Big)(i)?;
     match o {
         0xFFFFFFFF => Ok((i, NumberOfRecords::Streaming)),
