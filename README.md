@@ -6,6 +6,12 @@ This library allows to read a netcdf file as a raw byte stream and extract meta 
 This meta information is then used to optimize memory allocation and memory usage.
 
 ## Extracted information
+- [ ] NetCDF file header
+  - [x] magic
+  - [ ] numrecs
+  - [ ] dim_list
+  - [ ] gatt_list
+  - [ ] var_list
 - [ ] List of variables
 - [ ] List of coordinate variables
 - [ ] For each variable
