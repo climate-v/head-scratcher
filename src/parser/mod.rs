@@ -1,6 +1,11 @@
+//! Main parsing module
+//!
+//! # Parser
+//! Main parsing module.
 use crate::error::HeadScratcherError as HSE;
 use nom::{bytes::streaming::tag, number::streaming::u8, IResult};
 
+/// Supported NetCDF versions
 #[derive(Debug, PartialEq)]
 pub enum NetCDFVersion {
     Classic,
@@ -12,7 +17,7 @@ fn take_u8(i: &[u8]) -> IResult<&[u8], u8, HSE<&[u8]>> {
     u8(i)
 }
 
-/// Check file initials [atomic]
+/// Check NetCDF initials [atomic]
 pub fn initials(i: &[u8]) -> IResult<&[u8], &[u8], HSE<&[u8]>> {
     tag("CDF")(i)
 }

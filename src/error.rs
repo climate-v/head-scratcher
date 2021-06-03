@@ -1,9 +1,10 @@
-//! Custom error messages from the crate
+//! Custom error messages from NetCDF head scratcher
 //!
 //! - [Official nom documentation about error management](https://github.com/Geal/nom/blob/master/doc/error_management.md)
 //! - [Official nom example about custom error](https://github.com/Geal/nom/blob/master/examples/custom_error.rs)
 use nom::error::ErrorKind as NomErrorKind;
 
+/// Custom error types
 #[derive(Debug, PartialEq)]
 pub enum HeadScratcherError<I> {
     EmptyError,
