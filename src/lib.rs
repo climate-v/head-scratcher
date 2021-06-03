@@ -1,3 +1,7 @@
+/// Netcdf Head Scratcher - Library for stream parsing netcdf files
+pub mod error;
+
+
 #[cfg(test)]
 mod tests {
     #[test]
