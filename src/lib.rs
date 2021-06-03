@@ -1,4 +1,4 @@
-/// Netcdf Head Scratcher - Library for stream parsing netcdf files
+//! Netcdf Head Scratcher - Library for stream parsing netcdf files
 pub mod error;
 
 

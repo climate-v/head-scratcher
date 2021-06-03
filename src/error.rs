@@ -1,7 +1,7 @@
-/// Custom error messages from the crate
-///
-/// - [Official nom documentation about error management](https://github.com/Geal/nom/blob/master/doc/error_management.md)
-/// - [Official nom example about custom error](https://github.com/Geal/nom/blob/master/examples/custom_error.rs)
+//! Custom error messages from the crate
+//!
+//! - [Official nom documentation about error management](https://github.com/Geal/nom/blob/master/doc/error_management.md)
+//! - [Official nom example about custom error](https://github.com/Geal/nom/blob/master/examples/custom_error.rs)
 use nom::error::ErrorKind as NomErrorKind;
 
 #[derive(Debug, PartialEq)]
