@@ -3,7 +3,7 @@ Library for reading the header information from netcdf files.
 
 ## Use case
 This library allows to read a netcdf file as a raw byte stream and extract meta information.
-This meta information is then used to optimize memory allocation and usage.
+This meta information is then used to optimize memory allocation and memory usage.
 
 ## Extracted information
 - [ ] List of variables
