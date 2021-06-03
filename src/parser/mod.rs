@@ -58,17 +58,39 @@ pub fn magic(i: &[u8]) -> IResult<&[u8], NetCDFVersion, HSE<&[u8]>> {
 #[cfg(test)]
 mod tests {
     use core::panic;
-
     use super::*;
 
     #[test]
-    fn test_magic_nc() {
-        let f = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
-        let (_, v) = magic(f).unwrap();
-        assert_eq!(v, NetCDFVersion::Classic);
-        let f = include_bytes!("../../assets/testrh.nc");
-        let (_, v) = magic(f).unwrap();
-        assert_eq!(v, NetCDFVersion::Classic);
+    fn file_example_1() {
+        let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
+        let (i, o) = initials(i).unwrap();
+        assert_eq!(o, b"CDF");
+        let (i, o) = nc_version(i).unwrap();
+        assert_eq!(o, NetCDFVersion::Classic);
+        let (_i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(1))
+    }
+
+    #[test]
+    fn file_example_2() {
+        let i = include_bytes!("../../assets/testrh.nc");
+        let (i, o) = initials(i).unwrap();
+        assert_eq!(o, b"CDF");
+        let (i, o) = nc_version(i).unwrap();
+        assert_eq!(o, NetCDFVersion::Classic);
+        let (_i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(0))
+    }
+
+    #[test]
+    fn file_example_3() {
+        let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.3_nc64.nc");
+        let (i, o) = initials(i).unwrap();
+        assert_eq!(o, b"CDF");
+        let (i, o) = nc_version(i).unwrap();
+        assert_eq!(o, NetCDFVersion::Offset64);
+        let (_i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(1))
     }
 
     #[test]
