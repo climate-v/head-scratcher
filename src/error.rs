@@ -9,6 +9,8 @@ use nom::error::ErrorKind as NomErrorKind;
 pub enum HeadScratcherError<I> {
     EmptyError,
     UnsupportedNetCDFVersion,
+    UnsupportedListType,
+    UnsupportedZeroListType,
     NomError(I, NomErrorKind),
 }
 

@@ -10,6 +10,34 @@ use nom::{
     IResult,
 };
 
+/// List type
+#[derive(Debug, PartialEq)]
+pub enum ListType {
+    Absent,
+    DimensionList,
+    AttributeList,
+    VariableList,
+}
+
+pub fn list_type(i: &[u8]) -> IResult<&[u8], ListType, HSE<&[u8]>> {
+    let (i, o) = be_u32(i)?;
+    println!("{}", o);
+    match o {
+        csts::ZERO => {
+            let (i, o) = be_u32(i)?;
+            if o == csts::ZERO {
+                Ok((i, ListType::Absent))
+            } else {
+                Err(nom::Err::Error(HSE::UnsupportedZeroListType))
+            }
+        }
+        csts::NC_DIMENSION => Ok((i, ListType::DimensionList)),
+        csts::NC_VARIABLE => Ok((i, ListType::VariableList)),
+        csts::NC_ATTRIBUTE => Ok((i, ListType::AttributeList)),
+        _ => Err(nom::Err::Error(HSE::UnsupportedListType)),
+    }
+}
+
 /// Length of record dimension
 #[derive(Debug, PartialEq)]
 pub enum NumberOfRecords {
@@ -62,6 +90,7 @@ pub fn magic(i: &[u8]) -> IResult<&[u8], NetCDFVersion, HSE<&[u8]>> {
 }
 
 #[cfg(test)]
+#[allow(unused_variables)]
 mod tests {
     use super::*;
     use core::panic;
@@ -73,8 +102,10 @@ mod tests {
         assert_eq!(o, b"CDF");
         let (i, o) = nc_version(i).unwrap();
         assert_eq!(o, NetCDFVersion::Classic);
-        let (_i, o) = number_of_records(i).unwrap();
-        assert_eq!(o, NumberOfRecords::NonNegative(1))
+        let (i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(1));
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::DimensionList);
     }
 
     #[test]
@@ -84,8 +115,10 @@ mod tests {
         assert_eq!(o, b"CDF");
         let (i, o) = nc_version(i).unwrap();
         assert_eq!(o, NetCDFVersion::Classic);
-        let (_i, o) = number_of_records(i).unwrap();
-        assert_eq!(o, NumberOfRecords::NonNegative(0))
+        let (i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(0));
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::DimensionList);
     }
 
     #[test]
