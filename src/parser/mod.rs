@@ -96,6 +96,32 @@ mod tests {
     use core::panic;
 
     #[test]
+    fn file_example_empty() {
+        let i = include_bytes!("../../assets/empty.nc");
+        let (i, o) = initials(i).unwrap();
+        assert_eq!(o, b"CDF");
+        let (i, o) = nc_version(i).unwrap();
+        assert_eq!(o, NetCDFVersion::Classic);
+        let (i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(0));
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::Absent);
+    }
+
+    #[test]
+    fn file_example_small() {
+        let i = include_bytes!("../../assets/small.nc");
+        let (i, o) = initials(i).unwrap();
+        assert_eq!(o, b"CDF");
+        let (i, o) = nc_version(i).unwrap();
+        assert_eq!(o, NetCDFVersion::Classic);
+        let (i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(0));
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::DimensionList);
+    }
+
+    #[test]
     fn file_example_1() {
         let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
         let (i, o) = initials(i).unwrap();
