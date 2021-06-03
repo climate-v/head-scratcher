@@ -2,9 +2,13 @@
 //!
 //! # Parser
 //! Main parsing module.
-use crate::error::HeadScratcherError as HSE;
-use nom::{IResult, bytes::streaming::tag, number::streaming::{u32, u8}};
 use crate::constants_and_types as csts;
+use crate::error::HeadScratcherError as HSE;
+use nom::{
+    bytes::streaming::tag,
+    number::streaming::{u32, u8},
+    IResult,
+};
 
 /// Length of record dimension
 #[derive(Debug, PartialEq)]
@@ -19,7 +23,7 @@ pub fn number_of_records(i: &[u8]) -> IResult<&[u8], NumberOfRecords, HSE<&[u8]>
     let (i, o) = u32(nom::number::Endianness::Big)(i)?;
     match o {
         csts::STREAMING => Ok((i, NumberOfRecords::Streaming)),
-        _ => Ok((i, NumberOfRecords::NonNegative(o)))
+        _ => Ok((i, NumberOfRecords::NonNegative(o))),
     }
 }
 
@@ -59,8 +63,8 @@ pub fn magic(i: &[u8]) -> IResult<&[u8], NetCDFVersion, HSE<&[u8]>> {
 
 #[cfg(test)]
 mod tests {
-    use core::panic;
     use super::*;
+    use core::panic;
 
     #[test]
     fn file_example_1() {
