@@ -6,7 +6,7 @@ use crate::constants_and_types as csts;
 use crate::error::HeadScratcherError as HSE;
 use nom::{
     bytes::streaming::tag,
-    number::streaming::{u32, u8},
+    number::streaming::{be_u32, u8},
     IResult,
 };
 
@@ -20,7 +20,7 @@ pub enum NumberOfRecords {
 /// Length of record dimension
 pub fn number_of_records(i: &[u8]) -> IResult<&[u8], NumberOfRecords, HSE<&[u8]>> {
     // netCDF3 uses big endian, netCDF4 needs to be checked
-    let (i, o) = u32(nom::number::Endianness::Big)(i)?;
+    let (i, o) = be_u32(i)?;
     match o {
         csts::STREAMING => Ok((i, NumberOfRecords::Streaming)),
         _ => Ok((i, NumberOfRecords::NonNegative(o))),
