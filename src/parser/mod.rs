@@ -3,7 +3,23 @@
 //! # Parser
 //! Main parsing module.
 use crate::error::HeadScratcherError as HSE;
-use nom::{bytes::streaming::tag, number::streaming::u8, IResult};
+use nom::{IResult, bytes::streaming::tag, number::streaming::{u32, u8}};
+
+/// Length of record dimension
+#[derive(Debug, PartialEq)]
+pub enum NumberOfRecords {
+    NonNegative(u32),
+    Streaming,
+}
+
+/// Length of record dimension
+pub fn number_of_records(i: &[u8]) -> IResult<&[u8], NumberOfRecords, HSE<&[u8]>> {
+    let (i, o) = u32(nom::number::Endianness::Big)(i)?;
+    match o {
+        0xFFFFFFFF => Ok((i, NumberOfRecords::Streaming)),
+        _ => Ok((i, NumberOfRecords::NonNegative(o)))
+    }
+}
 
 /// Supported NetCDF versions
 #[derive(Debug, PartialEq)]
@@ -56,11 +72,13 @@ mod tests {
     }
 
     #[test]
-    fn test_initials_nc() {
-        let f = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
-        initials(f).unwrap();
-        let f = include_bytes!("../../assets/testrh.nc");
-        initials(f).unwrap();
+    fn test_size() {
+        let data = [0x0, 0x0, 0x0, 0xAu8];
+        let (_, o) = number_of_records(&data).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(10));
+        let data = [0xFF, 0xFF, 0xFF, 0xFFu8];
+        let (_, o) = number_of_records(&data).unwrap();
+        assert_eq!(o, NumberOfRecords::Streaming)
     }
 
     #[test]
