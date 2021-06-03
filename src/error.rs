@@ -7,7 +7,8 @@ use nom::error::ErrorKind as NomErrorKind;
 #[derive(Debug, PartialEq)]
 pub enum HeadScratcherError<I> {
     EmptyError,
-    NomError(I, NomErrorKind)
+    UnsupportedNetCDFVersion,
+    NomError(I, NomErrorKind),
 }
 
 impl<I> nom::error::ParseError<I> for HeadScratcherError<I> {
@@ -18,7 +19,6 @@ impl<I> nom::error::ParseError<I> for HeadScratcherError<I> {
         other
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -34,7 +34,7 @@ mod tests {
         let perror = throw_custom_error(b"8").unwrap_err();
         match perror {
             Error(e) => assert_eq!(e, HeadScratcherError::EmptyError),
-            _ => panic!("Unexpected error: {:?}", perror)
+            _ => panic!("Unexpected error: {:?}", perror),
         }
     }
 }
