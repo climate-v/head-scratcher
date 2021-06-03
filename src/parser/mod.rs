@@ -4,11 +4,13 @@
 //! Main parsing module.
 use crate::error::HeadScratcherError as HSE;
 use nom::{IResult, bytes::streaming::tag, number::streaming::{u32, u8}};
+use constants_and_types as csts;
+pub mod constants_and_types;
 
 /// Length of record dimension
 #[derive(Debug, PartialEq)]
 pub enum NumberOfRecords {
-    NonNegative(u32),
+    NonNegative(csts::NON_NEG),
     Streaming,
 }
 
@@ -17,7 +19,7 @@ pub fn number_of_records(i: &[u8]) -> IResult<&[u8], NumberOfRecords, HSE<&[u8]>
     // netCDF3 uses big endian, netCDF4 needs to be checked
     let (i, o) = u32(nom::number::Endianness::Big)(i)?;
     match o {
-        0xFFFFFFFF => Ok((i, NumberOfRecords::Streaming)),
+        csts::STREAMING => Ok((i, NumberOfRecords::Streaming)),
         _ => Ok((i, NumberOfRecords::NonNegative(o)))
     }
 }
