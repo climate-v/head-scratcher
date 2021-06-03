@@ -4,8 +4,7 @@
 //! Main parsing module.
 use crate::error::HeadScratcherError as HSE;
 use nom::{IResult, bytes::streaming::tag, number::streaming::{u32, u8}};
-use constants_and_types as csts;
-pub mod constants_and_types;
+use crate::constants_and_types as csts;
 
 /// Length of record dimension
 #[derive(Debug, PartialEq)]
