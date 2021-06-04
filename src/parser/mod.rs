@@ -17,6 +17,7 @@ pub enum ListType {
     VariableList,
 }
 
+/// Get the name of an element [combined]
 pub fn name(i: &[u8]) -> HSEResult<&[u8], &str> {
     let (i, count) = be_u32(i)?;
     let (i, name) = nom::bytes::streaming::take(count as usize)(i)?;
@@ -26,7 +27,7 @@ pub fn name(i: &[u8]) -> HSEResult<&[u8], &str> {
     }
 }
 
-/// Decide upon the type of following list type
+/// Decide upon the type of following list type [atomic]
 pub fn list_type(i: &[u8]) -> HSEResult<&[u8], ListType> {
     let (i, o) = be_u32(i)?;
     match o {
@@ -52,12 +53,12 @@ pub enum NumberOfRecords {
     Streaming,
 }
 
-/// Number of elements
+/// Number of elements [atomic]
 pub fn nelems(i: &[u8]) -> HSEResult<&[u8], u32> {
     be_u32(i)
 }
 
-/// Length of record dimension
+/// Length of record dimension [atomic]
 pub fn number_of_records(i: &[u8]) -> HSEResult<&[u8], NumberOfRecords> {
     // netCDF3 uses big endian, netCDF4 needs to be checked
     let (i, o) = be_u32(i)?;
@@ -74,7 +75,7 @@ pub enum NetCDFVersion {
     Offset64,
 }
 
-/// Get a single byte
+/// Get a single byte [atomic]
 fn take_u8(i: &[u8]) -> HSEResult<&[u8], u8> {
     u8(i)
 }
