@@ -12,6 +12,25 @@ use nom::{
 
 type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 
+/// NetCDF Dimension
+#[derive(Debug, PartialEq)]
+pub struct NetCDFDimension {
+    name: String,
+    length: usize,
+}
+
+impl NetCDFDimension {
+    pub fn new(name: String, length: usize) -> Self {
+        NetCDFDimension { name, length }
+    }
+}
+
+pub fn dimension(i: &[u8]) -> HSEResult<&[u8], NetCDFDimension> {
+    let (i, (name, dim_length)) = nom::sequence::tuple((name, dim_length))(i)?;
+    let ncdim = NetCDFDimension::new(name.to_string(), dim_length as usize);
+    Ok((i, ncdim))
+}
+
 /// NetCDF data format Type
 #[derive(Debug, PartialEq)]
 #[allow(non_camel_case_types)]
@@ -186,10 +205,9 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 1);
-        let (i, o) = name(i).unwrap();
-        assert_eq!(o, "dim");
-        let (i, o) = dim_length(i).unwrap();
-        assert_eq!(o, 5);
+        let (i, o) = dimension(i).unwrap();
+        let d = NetCDFDimension::new("dim".to_string(), 5);
+        assert_eq!(o, d);
     }
 
     #[test]
@@ -205,10 +223,9 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 5);
-        let (i, o) = name(i).unwrap();
-        assert_eq!(o, "lat");
-        let (i, o) = dim_length(i).unwrap();
-        assert_eq!(o, 128)
+        let (i, o) = dimension(i).unwrap();
+        let d = NetCDFDimension::new("lat".to_string(), 128);
+        assert_eq!(o, d);
     }
 
     #[test]
@@ -224,8 +241,9 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 1);
-        let (i, o) = name(i).unwrap();
-        assert_eq!(o, "dim1");
+        let (i, o) = dimension(i).unwrap();
+        let d = NetCDFDimension::new("dim1".to_string(), 0);
+        assert_eq!(o, d);
     }
 
     #[test]
@@ -241,8 +259,8 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 5);
-        let (i, o) = name(i).unwrap();
-        assert_eq!(o, "time");
+        let (i, o) = dimension(i).unwrap();
+        let d = NetCDFDimension::new("time".to_string(), 1);
     }
 
     #[test]
