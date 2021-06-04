@@ -17,6 +17,15 @@ pub enum ListType {
     VariableList,
 }
 
+pub fn name(i: &[u8]) -> HSEResult<&[u8], &str> {
+    let (i, count) = be_u32(i)?;
+    let (i, name) = nom::bytes::streaming::take(count as usize)(i)?;
+    match std::str::from_utf8(name) {
+        Ok(name) => Ok((i, name)),
+        Err(_) => Err(nom::Err::Error(HSE::UTF8error)),
+    }
+}
+
 /// Decide upon the type of following list type
 pub fn list_type(i: &[u8]) -> HSEResult<&[u8], ListType> {
     let (i, o) = be_u32(i)?;
@@ -130,6 +139,8 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 1);
+        let (i, o) = name(i).unwrap();
+        assert_eq!(o, "dim");
     }
 
     #[test]
@@ -145,6 +156,8 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 5);
+        let (i, o) = name(i).unwrap();
+        assert_eq!(o, "lat");
     }
 
     #[test]
@@ -160,6 +173,8 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 1);
+        let (i, o) = name(i).unwrap();
+        assert_eq!(o, "dim1");
     }
 
     #[test]
@@ -175,6 +190,8 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 5);
+        let (i, o) = name(i).unwrap();
+        assert_eq!(o, "time");
     }
 
     #[test]
