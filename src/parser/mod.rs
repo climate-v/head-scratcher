@@ -57,6 +57,12 @@ pub fn dim_length(i: &[u8]) -> HSEResult<&[u8], u32> {
 pub fn name(i: &[u8]) -> HSEResult<&[u8], &str> {
     let (i, count) = be_u32(i)?;
     let (i, name) = nom::bytes::streaming::take(count as usize)(i)?;
+
+    // names are filled to the 32 bits (4 bytes)
+    // the remainder needs to be kicked out while parsing
+    let drop = 4 - name.len() % 4;
+    let (i, _) = nom::bytes::streaming::take(drop as u8)(i)?;
+
     match std::str::from_utf8(name) {
         Ok(name) => Ok((i, name)),
         Err(_) => Err(nom::Err::Error(HSE::UTF8error)),
