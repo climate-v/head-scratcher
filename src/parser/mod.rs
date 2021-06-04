@@ -4,10 +4,39 @@
 //! Main parsing module.
 use crate::constants_and_types as csts;
 use crate::error::HeadScratcherError as HSE;
-use nom::{IResult, bytes::streaming::tag, number::streaming::{be_u32, u8}};
+use nom::{
+    bytes::streaming::tag,
+    number::streaming::{be_u32, u8},
+    IResult,
+};
 
 type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 
+/// NetCDF data format Type
+#[derive(Debug, PartialEq)]
+#[allow(non_camel_case_types)]
+pub enum NetCDFType {
+    NC_BYTE,
+    NC_CHAR,
+    NC_SHORT,
+    NC_INT,
+    NC_FLOAT,
+    NC_DOUBLE,
+}
+
+/// NetCDF type [atomic]
+pub fn nc_type(i: &[u8]) -> HSEResult<&[u8], NetCDFType> {
+    let (i, o) = be_u32(i)?;
+    match o {
+        csts::NC_BYTE => Ok((i, NetCDFType::NC_BYTE)),
+        csts::NC_CHAR => Ok((i, NetCDFType::NC_CHAR)),
+        csts::NC_SHORT => Ok((i, NetCDFType::NC_SHORT)),
+        csts::NC_INT => Ok((i, NetCDFType::NC_INT)),
+        csts::NC_FLOAT => Ok((i, NetCDFType::NC_FLOAT)),
+        csts::NC_DOUBLE => Ok((i, NetCDFType::NC_DOUBLE)),
+        _ => Err(nom::Err::Error(HSE::UnknownNetCDFType)),
+    }
+}
 
 /// Number of elements [atomic]
 pub fn nelems(i: &[u8]) -> HSEResult<&[u8], u32> {
@@ -239,5 +268,30 @@ mod tests {
         assert_eq!(o, NetCDFVersion::Classic);
         let (_, o) = nc_version(&[2u8]).unwrap();
         assert_eq!(o, NetCDFVersion::Offset64);
+    }
+
+    #[test]
+    fn test_nctypes() {
+        let types: [u8; 44] = [
+            0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 2, 0,
+            0, 0, 5, 0, 0, 0, 6, 0, 0, 0, 4, 0, 0, 0, 4,
+        ];
+        let expected: [NetCDFType; 11] = [
+            NetCDFType::NC_SHORT,
+            NetCDFType::NC_CHAR,
+            NetCDFType::NC_BYTE,
+            NetCDFType::NC_BYTE,
+            NetCDFType::NC_BYTE,
+            NetCDFType::NC_SHORT,
+            NetCDFType::NC_CHAR,
+            NetCDFType::NC_FLOAT,
+            NetCDFType::NC_DOUBLE,
+            NetCDFType::NC_INT,
+            NetCDFType::NC_INT,
+        ];
+        for (factor, exp) in expected.iter().enumerate() {
+            let (_, o) = nc_type(&types[(factor * 4)..]).unwrap();
+            assert_eq!(o, *exp)
+        }
     }
 }

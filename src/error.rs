@@ -12,6 +12,7 @@ pub enum HeadScratcherError<I> {
     UnsupportedListType,
     UnsupportedZeroListType,
     UTF8error,
+    UnknownNetCDFType,
     NomError(I, NomErrorKind),
 }
 
