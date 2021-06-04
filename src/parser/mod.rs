@@ -10,6 +10,8 @@ use nom::{
     IResult,
 };
 
+type HSEResult<I, O> = IResult<I, O, HSE<I>>;
+
 /// List type
 #[derive(Debug, PartialEq)]
 pub enum ListType {
@@ -19,9 +21,9 @@ pub enum ListType {
     VariableList,
 }
 
-pub fn list_type(i: &[u8]) -> IResult<&[u8], ListType, HSE<&[u8]>> {
+/// Decide upon the type of following list type
+pub fn list_type(i: &[u8]) -> HSEResult<&[u8], ListType> {
     let (i, o) = be_u32(i)?;
-    println!("{}", o);
     match o {
         csts::ZERO => {
             let (i, o) = be_u32(i)?;
@@ -46,7 +48,7 @@ pub enum NumberOfRecords {
 }
 
 /// Length of record dimension
-pub fn number_of_records(i: &[u8]) -> IResult<&[u8], NumberOfRecords, HSE<&[u8]>> {
+pub fn number_of_records(i: &[u8]) -> HSEResult<&[u8], NumberOfRecords> {
     // netCDF3 uses big endian, netCDF4 needs to be checked
     let (i, o) = be_u32(i)?;
     match o {
@@ -63,17 +65,17 @@ pub enum NetCDFVersion {
 }
 
 /// Get a single byte
-fn take_u8(i: &[u8]) -> IResult<&[u8], u8, HSE<&[u8]>> {
+fn take_u8(i: &[u8]) -> HSEResult<&[u8], u8> {
     u8(i)
 }
 
 /// Check NetCDF initials [atomic]
-pub fn initials(i: &[u8]) -> IResult<&[u8], &[u8], HSE<&[u8]>> {
+pub fn initials(i: &[u8]) -> HSEResult<&[u8], &[u8]> {
     tag("CDF")(i)
 }
 
 /// Check NetCDF version [atomic]
-pub fn nc_version(i: &[u8]) -> IResult<&[u8], NetCDFVersion, HSE<&[u8]>> {
+pub fn nc_version(i: &[u8]) -> HSEResult<&[u8], NetCDFVersion> {
     let (i, o) = take_u8(i)?;
     match o {
         1 => Ok((i, NetCDFVersion::Classic)),
@@ -83,7 +85,7 @@ pub fn nc_version(i: &[u8]) -> IResult<&[u8], NetCDFVersion, HSE<&[u8]>> {
 }
 
 /// Check NetCDF magic bytes [combined]
-pub fn magic(i: &[u8]) -> IResult<&[u8], NetCDFVersion, HSE<&[u8]>> {
+pub fn magic(i: &[u8]) -> HSEResult<&[u8], NetCDFVersion> {
     let (i, _) = initials(i)?;
     let (i, v) = nc_version(i)?;
     Ok((i, v))
