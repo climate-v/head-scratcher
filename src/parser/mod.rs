@@ -47,6 +47,11 @@ pub enum NumberOfRecords {
     Streaming,
 }
 
+/// Number of elements
+pub fn nelems(i: &[u8]) -> HSEResult<&[u8], u32> {
+    be_u32(i)
+}
+
 /// Length of record dimension
 pub fn number_of_records(i: &[u8]) -> HSEResult<&[u8], NumberOfRecords> {
     // netCDF3 uses big endian, netCDF4 needs to be checked
@@ -108,6 +113,8 @@ mod tests {
         assert_eq!(o, NumberOfRecords::NonNegative(0));
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::Absent);
+        let (i, o) = nelems(i).unwrap();
+        assert_eq!(o, 0);
     }
 
     #[test]
@@ -121,6 +128,8 @@ mod tests {
         assert_eq!(o, NumberOfRecords::NonNegative(0));
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::DimensionList);
+        let (i, o) = nelems(i).unwrap();
+        assert_eq!(o, 1);
     }
 
     #[test]
@@ -134,6 +143,8 @@ mod tests {
         assert_eq!(o, NumberOfRecords::NonNegative(1));
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::DimensionList);
+        let (i, o) = nelems(i).unwrap();
+        assert_eq!(o, 5);
     }
 
     #[test]
@@ -147,6 +158,8 @@ mod tests {
         assert_eq!(o, NumberOfRecords::NonNegative(0));
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::DimensionList);
+        let (i, o) = nelems(i).unwrap();
+        assert_eq!(o, 1);
     }
 
     #[test]
@@ -156,8 +169,12 @@ mod tests {
         assert_eq!(o, b"CDF");
         let (i, o) = nc_version(i).unwrap();
         assert_eq!(o, NetCDFVersion::Offset64);
-        let (_i, o) = number_of_records(i).unwrap();
-        assert_eq!(o, NumberOfRecords::NonNegative(1))
+        let (i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(1));
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::DimensionList);
+        let (i, o) = nelems(i).unwrap();
+        assert_eq!(o, 5);
     }
 
     #[test]
