@@ -112,9 +112,13 @@ mod tests {
         let (i, o) = number_of_records(i).unwrap();
         assert_eq!(o, NumberOfRecords::NonNegative(0));
         let (i, o) = list_type(i).unwrap();
-        assert_eq!(o, ListType::Absent);
-        let (i, o) = nelems(i).unwrap();
-        assert_eq!(o, 0);
+        assert_eq!(o, ListType::Absent); // No dim list
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::Absent); // No atrr list
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::Absent); // No var list
+        let empty: &[u8] = &[];
+        assert_eq!(i, empty)
     }
 
     #[test]
