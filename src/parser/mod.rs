@@ -79,7 +79,10 @@ pub fn name(i: &[u8]) -> HSEResult<&[u8], &str> {
 
     // names are filled to the 32 bits (4 bytes)
     // the remainder needs to be kicked out while parsing
-    let drop = 4 - name.len() % 4;
+    let mut drop = 4 - (count % 4);
+    if drop == 4 {
+        drop = 0;
+    }
     let (i, _) = nom::bytes::streaming::take(drop as u8)(i)?;
 
     match std::str::from_utf8(name) {
