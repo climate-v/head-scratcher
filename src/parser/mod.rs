@@ -20,22 +20,25 @@ pub struct NetCDFDimension {
 }
 
 impl NetCDFDimension {
+    /// Create new NetCDF dimension
     pub fn new(name: String, length: usize) -> Self {
         NetCDFDimension { name, length }
     }
 }
 
+/// Parse a single NetCDF dimension [combined]
 pub fn dimension(i: &[u8]) -> HSEResult<&[u8], NetCDFDimension> {
     let (i, (name, dim_length)) = nom::sequence::tuple((name, dim_length))(i)?;
     let ncdim = NetCDFDimension::new(name.to_string(), dim_length as usize);
     Ok((i, ncdim))
 }
 
+/// Parse a list of NetCDF dimensions [combined]
 pub fn dimension_list(i: &[u8]) -> HSEResult<&[u8], Vec<NetCDFDimension>> {
     nom::multi::length_count(nelems, dimension)(i)
 }
 
-/// NetCDF data format Type
+/// NetCDF data format types
 #[derive(Debug, PartialEq)]
 #[allow(non_camel_case_types)]
 pub enum NetCDFType {
@@ -47,7 +50,7 @@ pub enum NetCDFType {
     NC_DOUBLE,
 }
 
-/// NetCDF type [atomic]
+/// Parse NetCDF data format types [atomic]
 pub fn nc_type(i: &[u8]) -> HSEResult<&[u8], NetCDFType> {
     let (i, o) = be_u32(i)?;
     match o {
@@ -61,22 +64,22 @@ pub fn nc_type(i: &[u8]) -> HSEResult<&[u8], NetCDFType> {
     }
 }
 
-/// Number of elements [atomic]
+/// Parse number of elements [atomic]
 pub fn nelems(i: &[u8]) -> HSEResult<&[u8], u32> {
     non_neg(i)
 }
 
-/// Dimension length [atomic]
+/// Parse non negative numbers [atomic]
 pub fn non_neg(i: &[u8]) -> HSEResult<&[u8], u32> {
     be_u32(i)
 }
 
-/// Dimension length [atomic]
+/// Parse dimension length [atomic]
 pub fn dim_length(i: &[u8]) -> HSEResult<&[u8], u32> {
     non_neg(i)
 }
 
-/// Get the name of an element [combined]
+/// Parse the name of an element (dimension, variable, or attribute) [combined]
 pub fn name(i: &[u8]) -> HSEResult<&[u8], &str> {
     let (i, count) = be_u32(i)?;
     let (i, name) = nom::bytes::streaming::take(count as usize)(i)?;
@@ -104,7 +107,7 @@ pub enum ListType {
     VariableList,
 }
 
-/// Decide upon the type of following list type [atomic]
+/// Parse upcoming list type [atomic]
 pub fn list_type(i: &[u8]) -> HSEResult<&[u8], ListType> {
     let (i, o) = be_u32(i)?;
     match o {
@@ -130,7 +133,7 @@ pub enum NumberOfRecords {
     Streaming,
 }
 
-/// Length of record dimension [atomic]
+/// Parse length of record dimension [atomic]
 pub fn number_of_records(i: &[u8]) -> HSEResult<&[u8], NumberOfRecords> {
     // netCDF3 uses big endian, netCDF4 needs to be checked
     let (i, o) = be_u32(i)?;
@@ -147,17 +150,17 @@ pub enum NetCDFVersion {
     Offset64,
 }
 
-/// Get a single byte [atomic]
+/// Parse a single byte [atomic]
 fn take_u8(i: &[u8]) -> HSEResult<&[u8], u8> {
     u8(i)
 }
 
-/// Check NetCDF initials [atomic]
+/// Parse NetCDF initials [atomic]
 pub fn initials(i: &[u8]) -> HSEResult<&[u8], &[u8]> {
     tag("CDF")(i)
 }
 
-/// Check NetCDF version [atomic]
+/// Parse NetCDF version [atomic]
 pub fn nc_version(i: &[u8]) -> HSEResult<&[u8], NetCDFVersion> {
     let (i, o) = take_u8(i)?;
     match o {
@@ -167,7 +170,7 @@ pub fn nc_version(i: &[u8]) -> HSEResult<&[u8], NetCDFVersion> {
     }
 }
 
-/// Check NetCDF magic bytes [combined]
+/// Parse NetCDF magic bytes [combined]
 pub fn magic(i: &[u8]) -> HSEResult<&[u8], NetCDFVersion> {
     let (i, _) = initials(i)?;
     let (i, v) = nc_version(i)?;

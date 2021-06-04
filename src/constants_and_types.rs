@@ -1,4 +1,4 @@
-//! Constants and Types
+//! Constants and types
 #![allow(non_camel_case_types, unused_attributes)]
 #![rustfmt::skip]
 
