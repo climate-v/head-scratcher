@@ -31,6 +31,10 @@ pub fn dimension(i: &[u8]) -> HSEResult<&[u8], NetCDFDimension> {
     Ok((i, ncdim))
 }
 
+pub fn dimension_list(i: &[u8]) -> HSEResult<&[u8], Vec<NetCDFDimension>> {
+    nom::multi::length_count(nelems, dimension)(i)
+}
+
 /// NetCDF data format Type
 #[derive(Debug, PartialEq)]
 #[allow(non_camel_case_types)]
@@ -206,10 +210,8 @@ mod tests {
         assert_eq!(o, NumberOfRecords::NonNegative(0));
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::DimensionList);
-        let (i, o) = nelems(i).unwrap();
-        assert_eq!(o, 1);
-        let (i, o) = dimension(i).unwrap();
-        let d = NetCDFDimension::new("dim".to_string(), 5);
+        let (i, o) = dimension_list(i).unwrap();
+        let d = vec![NetCDFDimension::new("dim".to_string(), 5)];
         assert_eq!(o, d);
     }
 
@@ -224,10 +226,14 @@ mod tests {
         assert_eq!(o, NumberOfRecords::NonNegative(1));
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::DimensionList);
-        let (i, o) = nelems(i).unwrap();
-        assert_eq!(o, 5);
-        let (i, o) = dimension(i).unwrap();
-        let d = NetCDFDimension::new("lat".to_string(), 128);
+        let (i, o) = dimension_list(i).unwrap();
+        let d = vec![
+            NetCDFDimension::new("lat".to_string(), 128),
+            NetCDFDimension::new("lon".to_string(), 256),
+            NetCDFDimension::new("bnds".to_string(), 2),
+            NetCDFDimension::new("plev".to_string(), 17),
+            NetCDFDimension::new("time".to_string(), 0), // TODO Should this be the length in NoR?
+        ];
         assert_eq!(o, d);
     }
 
@@ -242,10 +248,8 @@ mod tests {
         assert_eq!(o, NumberOfRecords::NonNegative(0));
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::DimensionList);
-        let (i, o) = nelems(i).unwrap();
-        assert_eq!(o, 1);
-        let (i, o) = dimension(i).unwrap();
-        let d = NetCDFDimension::new("dim1".to_string(), 0);
+        let (i, o) = dimension_list(i).unwrap();
+        let d = vec![NetCDFDimension::new("dim1".to_string(), 10_000)];
         assert_eq!(o, d);
     }
 
@@ -260,10 +264,15 @@ mod tests {
         assert_eq!(o, NumberOfRecords::NonNegative(1));
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::DimensionList);
-        let (i, o) = nelems(i).unwrap();
-        assert_eq!(o, 5);
-        let (i, o) = dimension(i).unwrap();
-        let d = NetCDFDimension::new("time".to_string(), 1);
+        let (i, o) = dimension_list(i).unwrap();
+        let d = vec![
+            NetCDFDimension::new("time".to_string(), 0), // TODO Should this be the length in NoR?
+            NetCDFDimension::new("lat".to_string(), 128),
+            NetCDFDimension::new("lon".to_string(), 256),
+            NetCDFDimension::new("bnds".to_string(), 2),
+            NetCDFDimension::new("plev".to_string(), 17),
+        ];
+        assert_eq!(o, d);
     }
 
     #[test]
