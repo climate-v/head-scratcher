@@ -182,6 +182,8 @@ mod tests {
         assert_eq!(o, 1);
         let (i, o) = name(i).unwrap();
         assert_eq!(o, "dim");
+        let (i, o) = dim_length(i).unwrap();
+        assert_eq!(o, 5);
     }
 
     #[test]
@@ -199,6 +201,8 @@ mod tests {
         assert_eq!(o, 5);
         let (i, o) = name(i).unwrap();
         assert_eq!(o, "lat");
+        let (i, o) = dim_length(i).unwrap();
+        assert_eq!(o, 128)
     }
 
     #[test]
