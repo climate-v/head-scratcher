@@ -6,21 +6,26 @@ This library allows to read a netcdf file as a raw byte stream and extract meta 
 This meta information is then used to optimize memory allocation and memory usage.
 
 ## Extracted information
+
+### Milestone 1
 - [ ] NetCDF file header
   - [x] magic
-  - [ ] numrecs
-  - [ ] dim_list
+  - [x] numrecs
+  - [x] dim_list
   - [ ] gatt_list
   - [ ] var_list
-- [ ] List of variables
-- [ ] List of coordinate variables
-- [ ] For each variable
-  - [ ] Name
-  - [ ] Size
-  - [ ] Offset
-  - [ ] Datatype
-  - [ ] List of coordinates
-  - [ ] is_coordinate
+
+### Milestone 2
+- [ ] Quality of life information
+  - [ ] List of variables
+  - [ ] List of coordinate variables
+  - [ ] For each variable
+    - [ ] Name
+    - [ ] Size
+    - [ ] Offset
+    - [ ] Datatype
+    - [ ] List of coordinates
+    - [ ] is_coordinate
 
 ## Resources
 - [Netcdf specification (incl. BNF)](https://cluster.earlham.edu/bccd-ng/testing/mobeen/GALAXSEEHPC/netcdf-4.1.3/man4/netcdf.html#File-Format)
