@@ -4,11 +4,7 @@
 //! Main parsing module.
 use crate::constants_and_types as csts;
 use crate::error::HeadScratcherError as HSE;
-use nom::{
-    bytes::streaming::tag,
-    number::streaming::{be_u32, u8},
-    IResult,
-};
+use nom::{IResult, bytes::streaming::tag, number::streaming::{be_u32, u8}};
 
 type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 
