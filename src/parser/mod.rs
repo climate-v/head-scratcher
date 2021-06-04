@@ -8,13 +8,20 @@ use nom::{IResult, bytes::streaming::tag, number::streaming::{be_u32, u8}};
 
 type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 
-/// List type
-#[derive(Debug, PartialEq)]
-pub enum ListType {
-    Absent,
-    DimensionList,
-    AttributeList,
-    VariableList,
+
+/// Number of elements [atomic]
+pub fn nelems(i: &[u8]) -> HSEResult<&[u8], u32> {
+    non_neg(i)
+}
+
+/// Dimension length [atomic]
+pub fn non_neg(i: &[u8]) -> HSEResult<&[u8], u32> {
+    be_u32(i)
+}
+
+/// Dimension length [atomic]
+pub fn dim_length(i: &[u8]) -> HSEResult<&[u8], u32> {
+    non_neg(i)
 }
 
 /// Get the name of an element [combined]
@@ -25,6 +32,15 @@ pub fn name(i: &[u8]) -> HSEResult<&[u8], &str> {
         Ok(name) => Ok((i, name)),
         Err(_) => Err(nom::Err::Error(HSE::UTF8error)),
     }
+}
+
+/// List type
+#[derive(Debug, PartialEq)]
+pub enum ListType {
+    Absent,
+    DimensionList,
+    AttributeList,
+    VariableList,
 }
 
 /// Decide upon the type of following list type [atomic]
@@ -51,11 +67,6 @@ pub fn list_type(i: &[u8]) -> HSEResult<&[u8], ListType> {
 pub enum NumberOfRecords {
     NonNegative(csts::NON_NEG),
     Streaming,
-}
-
-/// Number of elements [atomic]
-pub fn nelems(i: &[u8]) -> HSEResult<&[u8], u32> {
-    be_u32(i)
 }
 
 /// Length of record dimension [atomic]
