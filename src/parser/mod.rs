@@ -74,7 +74,7 @@ pub fn nc_type(i: &[u8]) -> HSEResult<&[u8], NetCDFType> {
         csts::NC_INT => Ok((i, NetCDFType::NC_INT)),
         csts::NC_FLOAT => Ok((i, NetCDFType::NC_FLOAT)),
         csts::NC_DOUBLE => Ok((i, NetCDFType::NC_DOUBLE)),
-        _ => Err(nom::Err::Error(HSE::UnknownNetCDFType)),
+        _ => Err(nom::Err::Error(HSE::UnknownNetCDFType(o as usize))),
     }
 }
 
