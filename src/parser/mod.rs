@@ -50,6 +50,20 @@ pub enum NetCDFType {
     NC_DOUBLE,
 }
 
+impl NetCDFType {
+    /// Get the external size of type in bytes
+    pub fn extsize(&self) -> usize {
+        match self {
+            NetCDFType::NC_BYTE => 1,
+            NetCDFType::NC_CHAR => 1,
+            NetCDFType::NC_SHORT => 2,
+            NetCDFType::NC_INT => 4,
+            NetCDFType::NC_FLOAT => 4,
+            NetCDFType::NC_DOUBLE => 8,
+        }
+    }
+}
+
 /// Parse NetCDF data format types [atomic]
 pub fn nc_type(i: &[u8]) -> HSEResult<&[u8], NetCDFType> {
     let (i, o) = be_u32(i)?;
