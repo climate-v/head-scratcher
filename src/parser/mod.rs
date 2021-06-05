@@ -235,6 +235,8 @@ mod tests {
         let (i, o) = dimension_list(i).unwrap();
         let d = vec![NetCDFDimension::new("dim".to_string(), 5)];
         assert_eq!(o, d);
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::Absent);
     }
 
     #[test]
@@ -257,6 +259,8 @@ mod tests {
             NetCDFDimension::new("time".to_string(), 0), // TODO Should this be the length in NoR?
         ];
         assert_eq!(o, d);
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::AttributeList);
     }
 
     #[test]
@@ -273,6 +277,8 @@ mod tests {
         let (i, o) = dimension_list(i).unwrap();
         let d = vec![NetCDFDimension::new("dim1".to_string(), 10_000)];
         assert_eq!(o, d);
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::Absent);
     }
 
     #[test]
@@ -295,6 +301,8 @@ mod tests {
             NetCDFDimension::new("plev".to_string(), 17),
         ];
         assert_eq!(o, d);
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::AttributeList);
     }
 
     #[test]
