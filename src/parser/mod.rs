@@ -240,7 +240,25 @@ mod tests {
     }
 
     #[test]
-    fn file_example_1() {
+    fn file_example_compressible() {
+        let i = include_bytes!("../../assets/testrh.nc");
+        let (i, o) = initials(i).unwrap();
+        assert_eq!(o, b"CDF");
+        let (i, o) = nc_version(i).unwrap();
+        assert_eq!(o, NetCDFVersion::Classic);
+        let (i, o) = number_of_records(i).unwrap();
+        assert_eq!(o, NumberOfRecords::NonNegative(0));
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::DimensionList);
+        let (i, o) = dimension_list(i).unwrap();
+        let d = vec![NetCDFDimension::new("dim1".to_string(), 10_000)];
+        assert_eq!(o, d);
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::Absent);
+    }
+
+    #[test]
+    fn file_nc3_classic() {
         let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
         let (i, o) = initials(i).unwrap();
         assert_eq!(o, b"CDF");
@@ -264,25 +282,7 @@ mod tests {
     }
 
     #[test]
-    fn file_example_2() {
-        let i = include_bytes!("../../assets/testrh.nc");
-        let (i, o) = initials(i).unwrap();
-        assert_eq!(o, b"CDF");
-        let (i, o) = nc_version(i).unwrap();
-        assert_eq!(o, NetCDFVersion::Classic);
-        let (i, o) = number_of_records(i).unwrap();
-        assert_eq!(o, NumberOfRecords::NonNegative(0));
-        let (i, o) = list_type(i).unwrap();
-        assert_eq!(o, ListType::DimensionList);
-        let (i, o) = dimension_list(i).unwrap();
-        let d = vec![NetCDFDimension::new("dim1".to_string(), 10_000)];
-        assert_eq!(o, d);
-        let (i, o) = list_type(i).unwrap();
-        assert_eq!(o, ListType::Absent);
-    }
-
-    #[test]
-    fn file_example_3() {
+    fn file_nc3_64offset() {
         let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.3_nc64.nc");
         let (i, o) = initials(i).unwrap();
         assert_eq!(o, b"CDF");
