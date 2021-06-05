@@ -12,6 +12,34 @@ use nom::{
 
 type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 
+/// NetCDF Attribute
+#[derive(Debug, PartialEq)]
+pub struct NetCDFAttribute {
+    name: String,
+    nc_type: NetCDFType,
+    data: Vec<u8>,
+}
+
+impl NetCDFAttribute {
+    pub fn new(name: String, nc_type: NetCDFType, data: Vec<u8>) -> Self {
+        NetCDFAttribute {
+            name,
+            nc_type,
+            data,
+        }
+    }
+}
+
+pub fn attribute(i: &[u8]) -> HSEResult<&[u8], NetCDFAttribute> {
+    let (i, (name, nc_type, nelems)) = nom::sequence::tuple((name, nc_type, nelems))(i)?;
+    let (i, data) = nom::bytes::streaming::take(nelems)(i)?;
+    // names are padded to the next 4-byte boundary
+    let drop = padding(nelems);
+    let (i, _) = nom::bytes::streaming::take(drop as u8)(i)?;
+    let result = NetCDFAttribute::new(name.to_string(), nc_type, data.to_vec());
+    Ok((i, result))
+}
+
 /// NetCDF Dimension
 #[derive(Debug, PartialEq)]
 pub struct NetCDFDimension {
@@ -279,6 +307,11 @@ mod tests {
         assert_eq!(o, d);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::AttributeList);
+        let (i, o) = nelems(i).unwrap();
+        assert_eq!(o, 18);
+        let (i, o) = attribute(i).unwrap();
+        let a = NetCDFAttribute::new("CVS_Id".to_string(), NetCDFType::NC_CHAR, vec![36, 73, 100, 36]);
+        assert_eq!(o, a);
     }
 
     #[test]
