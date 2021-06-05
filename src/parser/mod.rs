@@ -98,7 +98,7 @@ fn padding(count: u32) -> u8 {
     let pad = 4 - (count % 4);
     match pad {
         4 => 0,
-        _ => pad as u8
+        _ => pad as u8,
     }
 }
 
