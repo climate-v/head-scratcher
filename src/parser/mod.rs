@@ -79,17 +79,22 @@ pub fn dim_length(i: &[u8]) -> HSEResult<&[u8], u32> {
     non_neg(i)
 }
 
+/// Calculate padding to the next 4-byte boundary
+fn padding(count: u32) -> u8 {
+    let pad = 4 - (count % 4);
+    match pad {
+        4 => 0,
+        _ => pad as u8
+    }
+}
+
 /// Parse the name of an element (dimension, variable, or attribute) [combined]
 pub fn name(i: &[u8]) -> HSEResult<&[u8], &str> {
     let (i, count) = be_u32(i)?;
     let (i, name) = nom::bytes::streaming::take(count as usize)(i)?;
 
-    // names are filled to the 32 bits (4 bytes)
-    // the remainder needs to be kicked out while parsing
-    let mut drop = 4 - (count % 4);
-    if drop == 4 {
-        drop = 0;
-    }
+    // names are padded to the next 4-byte boundary
+    let drop = padding(count);
     let (i, _) = nom::bytes::streaming::take(drop as u8)(i)?;
 
     match std::str::from_utf8(name) {
