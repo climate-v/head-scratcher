@@ -317,6 +317,10 @@ mod tests {
         assert_eq!(o.len(), 18);
         let a = NetCDFAttribute::new("CVS_Id".to_string(), NetCDFType::NC_CHAR, vec![36, 73, 100, 36]);
         assert_eq!(o[0], a);
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::VariableList);
+        let (i, o) = nelems(i).unwrap();
+        assert_eq!(o, 12);
     }
 
     #[test]
@@ -341,6 +345,14 @@ mod tests {
         assert_eq!(o, d);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::AttributeList);
+        let (i, o) = attribute_list(i).unwrap();
+        assert_eq!(o.len(), 18);
+        let a = NetCDFAttribute::new("CVS_Id".to_string(), NetCDFType::NC_CHAR, vec![36, 73, 100, 36]);
+        assert_eq!(o[0], a);
+        let (i, o) = list_type(i).unwrap();
+        assert_eq!(o, ListType::VariableList);
+        let (i, o) = nelems(i).unwrap();
+        assert_eq!(o, 12);
     }
 
     #[test]
