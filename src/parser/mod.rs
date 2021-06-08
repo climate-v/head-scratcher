@@ -17,7 +17,7 @@ type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 pub struct NetCDFAttribute {
     name: String,
     nc_type: NetCDFType,
-    data: Vec<u8>,
+    data: Vec<u8>, // TODO Add support for proper data
 }
 
 impl NetCDFAttribute {
@@ -69,6 +69,7 @@ pub fn dimension(i: &[u8]) -> HSEResult<&[u8], NetCDFDimension> {
 /// Parse a list of NetCDF dimensions [combined]
 pub fn dimension_list(i: &[u8]) -> HSEResult<&[u8], Vec<NetCDFDimension>> {
     nom::multi::length_count(nelems, dimension)(i)
+    // TODO return HashMap instead of VectorList
 }
 
 /// NetCDF data format types
