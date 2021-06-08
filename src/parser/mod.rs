@@ -40,6 +40,11 @@ pub fn attribute(i: &[u8]) -> HSEResult<&[u8], NetCDFAttribute> {
     Ok((i, result))
 }
 
+pub fn attribute_list(i: &[u8]) -> HSEResult<&[u8], Vec<NetCDFAttribute>> {
+    nom::multi::length_count(nelems, attribute)(i)
+    // TODO return HashMap instead of VectorList
+}
+
 /// NetCDF Dimension
 #[derive(Debug, PartialEq)]
 pub struct NetCDFDimension {
@@ -307,11 +312,10 @@ mod tests {
         assert_eq!(o, d);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::AttributeList);
-        let (i, o) = nelems(i).unwrap();
-        assert_eq!(o, 18);
-        let (i, o) = attribute(i).unwrap();
+        let (i, o) = attribute_list(i).unwrap();
+        assert_eq!(o.len(), 18);
         let a = NetCDFAttribute::new("CVS_Id".to_string(), NetCDFType::NC_CHAR, vec![36, 73, 100, 36]);
-        assert_eq!(o, a);
+        assert_eq!(o[0], a);
     }
 
     #[test]
