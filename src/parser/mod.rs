@@ -44,8 +44,6 @@ impl NetCDFVariable {
 }
 
 pub fn variable(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], NetCDFVariable> {
-    // let (i, (name, dims, attrs, nct, vsize)) = nom::sequence::tuple((name, nom::multi::length_count(nelems, nelems), attribute_list, nc_type, nelems))(i)?;
-
     let (i, name) = name(i)?;
     let (i, dims) = nom::multi::length_count(nelems, nelems)(i)?;
     let (mut i, attr_present) = list_type(i)?;
@@ -80,6 +78,18 @@ pub fn variable(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], NetCDFVari
         begin,
     );
     Ok((i, var))
+}
+
+pub fn variable_list(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], Vec<NetCDFVariable>> {
+    let (mut i, mut count) = nelems(i)?;
+    let mut result: Vec<NetCDFVariable> = Vec::new();
+    while count > 0 {
+        let (k, v) = variable(i, version)?;
+        result.push(v);
+        count -= 1;
+        i = k;
+    }
+    Ok((i, result))
 }
 
 /// NetCDF Attribute
@@ -267,7 +277,7 @@ pub fn number_of_records(i: &[u8]) -> HSEResult<&[u8], NumberOfRecords> {
 }
 
 /// Supported NetCDF versions
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum NetCDFVersion {
     Classic,
     Offset64,
@@ -393,15 +403,13 @@ mod tests {
         assert_eq!(o[0], a);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::VariableList);
-        let (i, o) = nelems(i).unwrap();
-        assert_eq!(o, 12);
-        let (i, o) = variable(i, v).unwrap();
-        assert_eq!(o.name, "area");
-        assert_eq!(o.dims, vec![0, 1]);
-        assert_eq!(o.begin, 7564);
-        assert_eq!(o.vsize, 131072);
-        assert_eq!(o.nc_type, NetCDFType::NC_FLOAT);
-        assert_eq!(o.attributes.unwrap().len(), 2);
+        let (i, o) = variable_list(i, v).unwrap();
+        assert_eq!(o[0].name, "area");
+        assert_eq!(o[0].dims, vec![0, 1]);
+        assert_eq!(o[0].begin, 7564);
+        assert_eq!(o[0].vsize, 131072);
+        assert_eq!(o[0].nc_type, NetCDFType::NC_FLOAT);
+        // TODO check other variables
     }
 
     #[test]
