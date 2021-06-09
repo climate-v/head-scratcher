@@ -6,11 +6,81 @@ use crate::constants_and_types as csts;
 use crate::error::HeadScratcherError as HSE;
 use nom::{
     bytes::streaming::tag,
-    number::streaming::{be_u32, u8},
+    number::streaming::{be_u32, be_u64, u8},
     IResult,
 };
 
 type HSEResult<I, O> = IResult<I, O, HSE<I>>;
+
+/// MetCDF Variable
+#[derive(Debug, PartialEq)]
+pub struct NetCDFVariable {
+    name: String,
+    dims: Vec<u32>,
+    attributes: Option<Vec<NetCDFAttribute>>,
+    nc_type: NetCDFType,
+    vsize: usize,
+    begin: u64,
+}
+
+impl NetCDFVariable {
+    pub fn new(
+        name: String,
+        dims: Vec<u32>,
+        attributes: Option<Vec<NetCDFAttribute>>,
+        nc_type: NetCDFType,
+        vsize: usize,
+        begin: u64,
+    ) -> Self {
+        NetCDFVariable {
+            name,
+            dims,
+            attributes,
+            nc_type,
+            vsize,
+            begin,
+        }
+    }
+}
+
+pub fn variable(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], NetCDFVariable> {
+    // let (i, (name, dims, attrs, nct, vsize)) = nom::sequence::tuple((name, nom::multi::length_count(nelems, nelems), attribute_list, nc_type, nelems))(i)?;
+
+    let (i, name) = name(i)?;
+    let (i, dims) = nom::multi::length_count(nelems, nelems)(i)?;
+    let (mut i, attr_present) = list_type(i)?;
+    let attrs = match attr_present {
+        ListType::Absent => None,
+        _ => {
+            let (k, attrs) = attribute_list(i)?;
+            i = k;
+            Some(attrs)
+        }
+    };
+    let (i, nc_type) = nc_type(i)?;
+    let (mut i, vsize) = nelems(i)?;
+    let begin = match version {
+        NetCDFVersion::Classic => {
+            let (k, r) = be_u32(i)?;
+            i = k;
+            r as u64
+        }
+        NetCDFVersion::Offset64 => {
+            let (k, r) = be_u64(i)?;
+            i = k;
+            r as u64
+        }
+    };
+    let var = NetCDFVariable::new(
+        name.to_string(),
+        dims,
+        attrs,
+        nc_type,
+        vsize as usize,
+        begin,
+    );
+    Ok((i, var))
+}
 
 /// NetCDF Attribute
 #[derive(Debug, PartialEq)]
@@ -296,8 +366,8 @@ mod tests {
         let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
         let (i, o) = initials(i).unwrap();
         assert_eq!(o, b"CDF");
-        let (i, o) = nc_version(i).unwrap();
-        assert_eq!(o, NetCDFVersion::Classic);
+        let (i, v) = nc_version(i).unwrap();
+        assert_eq!(v, NetCDFVersion::Classic);
         let (i, o) = number_of_records(i).unwrap();
         assert_eq!(o, NumberOfRecords::NonNegative(1));
         let (i, o) = list_type(i).unwrap();
@@ -325,6 +395,13 @@ mod tests {
         assert_eq!(o, ListType::VariableList);
         let (i, o) = nelems(i).unwrap();
         assert_eq!(o, 12);
+        let (i, o) = variable(i, v).unwrap();
+        assert_eq!(o.name, "area");
+        assert_eq!(o.dims, vec![0, 1]);
+        assert_eq!(o.begin, 7564);
+        assert_eq!(o.vsize, 131072);
+        assert_eq!(o.nc_type, NetCDFType::NC_FLOAT);
+        assert_eq!(o.attributes.unwrap().len(), 2);
     }
 
     #[test]
