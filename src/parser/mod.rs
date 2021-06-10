@@ -246,6 +246,21 @@ pub enum ListType {
     VariableList,
 }
 
+/// Parse a zero [atomic]
+pub fn zero(i: &[u8]) -> HSEResult<&[u8], bool> {
+    let (i, o) = be_u32(i)?;
+    match o {
+        0 => Ok((i, true)),
+        _ => Err(nom::Err::Error(HSE::NonZeroValue(o))),
+    }
+}
+
+/// Parse an absent list [combined]
+pub fn absent(i: &[u8]) -> HSEResult<&[u8], ListType> {
+    let (i, _) = nom::sequence::tuple((zero, zero))(i)?;
+    Ok((i, ListType::Absent))
+}
+
 /// Parse upcoming list type [atomic]
 pub fn list_type(i: &[u8]) -> HSEResult<&[u8], ListType> {
     let (i, o) = be_u32(i)?;
@@ -261,7 +276,7 @@ pub fn list_type(i: &[u8]) -> HSEResult<&[u8], ListType> {
         csts::NC_DIMENSION => Ok((i, ListType::DimensionList)),
         csts::NC_VARIABLE => Ok((i, ListType::VariableList)),
         csts::NC_ATTRIBUTE => Ok((i, ListType::AttributeList)),
-        _ => Err(nom::Err::Error(HSE::UnsupportedListType)),
+        _ => Err(nom::Err::Error(HSE::UnsupportedListType(o))),
     }
 }
 
