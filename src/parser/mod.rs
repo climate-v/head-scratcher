@@ -12,7 +12,7 @@ use nom::{
 
 type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 
-/// MetCDF Variable
+/// NetCDF Variable
 #[derive(Debug, PartialEq)]
 pub struct NetCDFVariable {
     name: String,
@@ -24,6 +24,7 @@ pub struct NetCDFVariable {
 }
 
 impl NetCDFVariable {
+    /// Generate a new variable
     pub fn new(
         name: String,
         dims: Vec<u32>,
@@ -43,6 +44,7 @@ impl NetCDFVariable {
     }
 }
 
+/// Parse a single NetCDF variable [combined]
 pub fn variable(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], NetCDFVariable> {
     let (i, name) = name(i)?;
     let (i, dims) = nom::multi::length_count(nelems, nelems)(i)?;
@@ -80,6 +82,7 @@ pub fn variable(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], NetCDFVari
     Ok((i, var))
 }
 
+/// Parse a list of NetCDF variables [combined]
 pub fn variable_list(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], Vec<NetCDFVariable>> {
     let (mut i, mut count) = nelems(i)?;
     let mut result: Vec<NetCDFVariable> = Vec::new();
@@ -101,6 +104,7 @@ pub struct NetCDFAttribute {
 }
 
 impl NetCDFAttribute {
+    /// Create a new NetCDF Attribute
     pub fn new(name: String, nc_type: NetCDFType, data: Vec<u8>) -> Self {
         NetCDFAttribute {
             name,
@@ -110,6 +114,7 @@ impl NetCDFAttribute {
     }
 }
 
+/// Parse a single NetCDF attribute [combined]
 pub fn attribute(i: &[u8]) -> HSEResult<&[u8], NetCDFAttribute> {
     let (i, (name, nc_type, nelems)) = nom::sequence::tuple((name, nc_type, nelems))(i)?;
     let (i, data) = nom::bytes::streaming::take(nelems)(i)?;
@@ -120,6 +125,7 @@ pub fn attribute(i: &[u8]) -> HSEResult<&[u8], NetCDFAttribute> {
     Ok((i, result))
 }
 
+/// Parse a list of NetCDF attributes [combined]
 pub fn attribute_list(i: &[u8]) -> HSEResult<&[u8], Vec<NetCDFAttribute>> {
     nom::multi::length_count(nelems, attribute)(i)
     // TODO return HashMap instead of VectorList

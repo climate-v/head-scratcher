@@ -7,12 +7,21 @@ use nom::error::ErrorKind as NomErrorKind;
 /// Custom error types
 #[derive(Debug, PartialEq)]
 pub enum HeadScratcherError<I> {
+    /// Placeholder error
     EmptyError,
+    /// NetCDF version is not correct
     UnsupportedNetCDFVersion,
-    UnsupportedListType,
+    /// Type of list is unknown
+    UnsupportedListType(u32),
+    /// Expected zero, got something else
+    NonZeroValue(u32),
+    /// List type is 0
     UnsupportedZeroListType,
+    /// Parsing UTF-8 error
     UTF8error,
+    /// Unknown NetCDF data type
     UnknownNetCDFType(usize),
+    /// Error caused by parsing library
     NomError(I, NomErrorKind),
 }
 
