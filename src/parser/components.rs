@@ -441,8 +441,8 @@ mod tests {
         let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.3_nc64.nc");
         let (i, o) = initials(i).unwrap();
         assert_eq!(o, b"CDF");
-        let (i, o) = nc_version(i).unwrap();
-        assert_eq!(o, NetCDFVersion::Offset64);
+        let (i, v) = nc_version(i).unwrap();
+        assert_eq!(v, NetCDFVersion::Offset64);
         let (i, o) = number_of_records(i).unwrap();
         assert_eq!(o, NumberOfRecords::NonNegative(1));
         let (i, o) = list_type(i).unwrap();
@@ -468,8 +468,8 @@ mod tests {
         assert_eq!(o[0], a);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::VariableList);
-        let (i, o) = nelems(i).unwrap();
-        assert_eq!(o, 12);
+        let (i, o) = variable_list(i, v).unwrap();
+        // TODO: Read about fill values
     }
 
     #[test]
