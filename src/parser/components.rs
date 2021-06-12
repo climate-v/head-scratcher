@@ -4,13 +4,11 @@
 //! Main parsing module.
 use crate::constants_and_types as csts;
 use crate::error::HeadScratcherError as HSE;
+use crate::parser::HSEResult;
 use nom::{
     bytes::streaming::tag,
     number::streaming::{be_u32, be_u64, u8},
-    IResult,
 };
-
-type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 
 /// NetCDF Variable
 #[derive(Debug, PartialEq)]
