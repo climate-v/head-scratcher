@@ -248,7 +248,7 @@ pub enum ListType {
 pub fn zero(i: &[u8]) -> HSEResult<&[u8], bool> {
     let (i, o) = be_u32(i)?;
     match o {
-        0 => Ok((i, true)),
+        csts::ZERO => Ok((i, true)),
         _ => Err(nom::Err::Error(HSE::NonZeroValue(o))),
     }
 }
