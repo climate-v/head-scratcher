@@ -329,6 +329,11 @@ pub fn magic(i: &[u8]) -> HSEResult<&[u8], NetCDFVersion> {
     Ok((i, v))
 }
 
+pub fn eof(i: &[u8]) -> HSEResult<&[u8], bool> {
+    let (i, _) = nom::combinator::eof(i)?;
+    Ok((i, true))
+}
+
 #[cfg(test)]
 #[allow(unused_variables)]
 mod tests {
@@ -350,8 +355,8 @@ mod tests {
         assert_eq!(o, ListType::Absent); // No atrr list
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::Absent); // No var list
-        let empty: &[u8] = &[];
-        assert_eq!(i, empty)
+        let (i, o) = eof(i).unwrap();
+        assert!(o); // EOF
     }
 
     #[test]
