@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies]
 nom = "6.*"
+
+[dev-dependencies]
+netcdf = "0.6.*"
