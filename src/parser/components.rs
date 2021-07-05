@@ -5,6 +5,8 @@
 use crate::constants_and_types as csts;
 use crate::error::HeadScratcherError as HSE;
 use crate::parser::HSEResult;
+use std::collections::HashMap;
+pub type VariableHM = HashMap<String, NetCDFVariable>;
 use nom::{
     bytes::streaming::tag,
     number::streaming::{be_u32, be_u64, u8},
@@ -81,12 +83,12 @@ pub fn variable(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], NetCDFVari
 }
 
 /// Parse a list of NetCDF variables [combined]
-pub fn variable_list(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], Vec<NetCDFVariable>> {
+pub fn variable_list(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], VariableHM> {
     let (mut i, mut count) = nelems(i)?;
-    let mut result: Vec<NetCDFVariable> = Vec::new();
+    let mut result = HashMap::new();
     while count > 0 {
         let (k, v) = variable(i, version)?;
-        result.push(v);
+        result.insert(v.name.clone(), v);  // TODO: Implement without cloning
         count -= 1;
         i = k;
     }
@@ -428,11 +430,11 @@ mod tests {
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::VariableList);
         let (i, o) = variable_list(i, v).unwrap();
-        assert_eq!(o[0].name, "area");
-        assert_eq!(o[0].dims, vec![0, 1]);
-        assert_eq!(o[0].begin, 7564);
-        assert_eq!(o[0].vsize, 131072);
-        assert_eq!(o[0].nc_type, NetCDFType::NC_FLOAT);
+        assert_eq!(o["area"].name, "area");
+        assert_eq!(o["area"].dims, vec![0, 1]);
+        assert_eq!(o["area"].begin, 7564);
+        assert_eq!(o["area"].vsize, 131072);
+        assert_eq!(o["area"].nc_type, NetCDFType::NC_FLOAT);
         // TODO check other variables
     }
 

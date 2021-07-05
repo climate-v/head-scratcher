@@ -4,27 +4,25 @@
 //! Main parsing module
 use crate::error::HeadScratcherError as HSE;
 use components::{
-    self as cp, ListType, NetCDFAttribute, NetCDFDimension, NetCDFVariable, NetCDFVersion,
+    self as cp, ListType, NetCDFAttribute, NetCDFDimension, NetCDFVersion, VariableHM,
 };
 use cp::NumberOfRecords;
 use nom::IResult;
-// use std::collections::HashMap;
 
 pub mod components;
 
 pub type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 // type AttributeHM = HashMap<String, String>;
 // type DimensionHM = HashMap<u32, NetCDFDimension>;
-// type VariableHM = HashMap<String, NetCDFVariable>;
 
 /// NetCDF file format
 #[derive(Debug, PartialEq)]
 pub struct NetCDFHeader {
-    version: NetCDFVersion,
-    nor: NumberOfRecords,
-    attrs: Option<Vec<NetCDFAttribute>>,
-    dims: Option<Vec<NetCDFDimension>>,
-    vars: Option<Vec<NetCDFVariable>>,
+    pub version: NetCDFVersion,
+    pub nor: NumberOfRecords,
+    pub attrs: Option<Vec<NetCDFAttribute>>,
+    pub dims: Option<Vec<NetCDFDimension>>,
+    pub vars: Option<VariableHM>,
 }
 
 impl NetCDFHeader {
@@ -33,7 +31,7 @@ impl NetCDFHeader {
         nor: NumberOfRecords,
         attrs: Option<Vec<NetCDFAttribute>>,
         dims: Option<Vec<NetCDFDimension>>,
-        vars: Option<Vec<NetCDFVariable>>,
+        vars: Option<VariableHM>,
     ) -> Self {
         NetCDFHeader {
             version,
