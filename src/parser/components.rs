@@ -5,12 +5,13 @@
 use crate::constants_and_types as csts;
 use crate::error::HeadScratcherError as HSE;
 use crate::parser::HSEResult;
-use std::collections::HashMap;
-pub type VariableHM = HashMap<String, NetCDFVariable>;
 use nom::{
     bytes::streaming::tag,
     number::streaming::{be_u32, be_u64, u8},
 };
+use std::collections::HashMap;
+pub type DimensionHM = HashMap<usize, NetCDFDimension>;
+pub type VariableHM = HashMap<String, NetCDFVariable>;
 
 /// NetCDF Variable
 #[derive(Debug, PartialEq)]
@@ -153,9 +154,13 @@ pub fn dimension(i: &[u8]) -> HSEResult<&[u8], NetCDFDimension> {
 }
 
 /// Parse a list of NetCDF dimensions [combined]
-pub fn dimension_list(i: &[u8]) -> HSEResult<&[u8], Vec<NetCDFDimension>> {
-    nom::multi::length_count(nelems, dimension)(i)
-    // TODO return HashMap instead of VectorList
+pub fn dimension_list(i: &[u8]) -> HSEResult<&[u8], DimensionHM> {
+    let (i, dims) = nom::multi::length_count(nelems, dimension)(i)?;
+    let mut result: DimensionHM = HashMap::new();
+    for (i, d) in dims.into_iter().enumerate() {
+        result.insert(i, d);
+    }
+    Ok((i, result))
 }
 
 /// NetCDF data format types
@@ -374,7 +379,7 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = dimension_list(i).unwrap();
         let d = vec![NetCDFDimension::new("dim".to_string(), 5)];
-        assert_eq!(o, d);
+        assert_eq!(o[&0], d[0]);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::Absent);
     }
@@ -392,7 +397,7 @@ mod tests {
         assert_eq!(o, ListType::DimensionList);
         let (i, o) = dimension_list(i).unwrap();
         let d = vec![NetCDFDimension::new("dim1".to_string(), 10_000)];
-        assert_eq!(o, d);
+        assert_eq!(o[&0], d[0]);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::Absent);
     }
@@ -416,7 +421,9 @@ mod tests {
             NetCDFDimension::new("plev".to_string(), 17),
             NetCDFDimension::new("time".to_string(), 0), // TODO Should this be the length in NoR?
         ];
-        assert_eq!(o, d);
+        for i in 0..5 {
+            assert_eq!(o[&i], d[i]);
+        }
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::AttributeList);
         let (i, o) = attribute_list(i).unwrap();
@@ -457,7 +464,9 @@ mod tests {
             NetCDFDimension::new("bnds".to_string(), 2),
             NetCDFDimension::new("plev".to_string(), 17),
         ];
-        assert_eq!(o, d);
+        for i in 0..5 {
+            assert_eq!(o[&i], d[i]);
+        }
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::AttributeList);
         let (i, o) = attribute_list(i).unwrap();

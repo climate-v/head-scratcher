@@ -3,9 +3,7 @@
 //! # Parser
 //! Main parsing module
 use crate::error::HeadScratcherError as HSE;
-use components::{
-    self as cp, ListType, NetCDFAttribute, NetCDFDimension, NetCDFVersion, VariableHM,
-};
+use components::{self as cp, DimensionHM, ListType, NetCDFAttribute, NetCDFVersion, VariableHM};
 use cp::NumberOfRecords;
 use nom::IResult;
 
@@ -13,7 +11,6 @@ pub mod components;
 
 pub type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 // type AttributeHM = HashMap<String, String>;
-// type DimensionHM = HashMap<u32, NetCDFDimension>;
 
 /// NetCDF file format
 #[derive(Debug, PartialEq)]
@@ -21,7 +18,7 @@ pub struct NetCDFHeader {
     pub version: NetCDFVersion,
     pub nor: NumberOfRecords,
     pub attrs: Option<Vec<NetCDFAttribute>>,
-    pub dims: Option<Vec<NetCDFDimension>>,
+    pub dims: Option<DimensionHM>,
     pub vars: Option<VariableHM>,
 }
 
@@ -30,7 +27,7 @@ impl NetCDFHeader {
         version: NetCDFVersion,
         nor: NumberOfRecords,
         attrs: Option<Vec<NetCDFAttribute>>,
-        dims: Option<Vec<NetCDFDimension>>,
+        dims: Option<DimensionHM>,
         vars: Option<VariableHM>,
     ) -> Self {
         NetCDFHeader {
