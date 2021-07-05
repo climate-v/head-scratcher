@@ -88,7 +88,7 @@ pub fn variable_list(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], Varia
     let mut result = HashMap::new();
     while count > 0 {
         let (k, v) = variable(i, version)?;
-        result.insert(v.name.clone(), v);  // TODO: Implement without cloning
+        result.insert(v.name.clone(), v); // TODO: Implement without cloning
         count -= 1;
         i = k;
     }

@@ -1,4 +1,3 @@
-
 use netcdf_head_scratcher::parser::header;
 
 fn main() {
