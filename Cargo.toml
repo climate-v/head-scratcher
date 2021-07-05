@@ -11,3 +11,7 @@ nom = "6.*"
 
 [dev-dependencies]
 netcdf = "0.6.*"
+
+[[bin]]
+name = "headscratcher"
+path = "src/bin.rs"
