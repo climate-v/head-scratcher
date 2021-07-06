@@ -498,7 +498,7 @@ mod tests {
             NetCDFType::NC_CHAR,
             vec![36, 73, 100, 36],
         );
-        assert_eq!(o[0], a);
+        assert_eq!(o["CVS_Id"], a);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::VariableList);
         let (i, o) = variable_list(i, v).unwrap();
@@ -541,7 +541,7 @@ mod tests {
             NetCDFType::NC_CHAR,
             vec![36, 73, 100, 36],
         );
-        assert_eq!(o[0], a);
+        assert_eq!(o["CVS_Id"], a);
         let (i, o) = list_type(i).unwrap();
         assert_eq!(o, ListType::VariableList);
         let (i, o) = variable_list(i, v).unwrap();
