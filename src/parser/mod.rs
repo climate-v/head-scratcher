@@ -3,7 +3,9 @@
 //! # Parser
 //! Main parsing module
 use crate::error::HeadScratcherError as HSE;
-use components::{self as cp, DimensionHM, ListType, NumberOfRecords, AttributeHM, NetCDFVersion, VariableHM};
+use components::{
+    self as cp, AttributeHM, DimensionHM, ListType, NetCDFVersion, NumberOfRecords, VariableHM,
+};
 use nom::IResult;
 
 pub mod components;
