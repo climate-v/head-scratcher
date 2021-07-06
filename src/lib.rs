@@ -3,8 +3,15 @@ pub mod constants_and_types;
 pub mod error;
 pub mod parser;
 
+// https://cluster.earlham.edu/bccd-ng/testing/mobeen/GALAXSEEHPC/netcdf-4.1.3/man4/netcdf.html#Computing-Offsets
 fn product_vector(vecs: &[usize], record: bool) -> Vec<usize> {
-    unimplemented!()
+    let mut prod = 1usize;
+    let mut result: Vec<usize> = Vec::new();
+    for v in vecs.iter().rev() {
+        prod *= v;
+        result.insert(0, prod);
+    }
+    result
 }
 
 #[cfg(test)]
