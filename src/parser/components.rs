@@ -12,13 +12,14 @@ use nom::{
 use std::collections::HashMap;
 pub type DimensionHM = HashMap<usize, NetCDFDimension>;
 pub type VariableHM = HashMap<String, NetCDFVariable>;
+pub type AttributeHM = HashMap<String, NetCDFAttribute>;
 
 /// NetCDF Variable
 #[derive(Debug, PartialEq)]
 pub struct NetCDFVariable {
     name: String,
     dims: Vec<u32>,
-    attributes: Option<Vec<NetCDFAttribute>>,
+    attributes: Option<AttributeHM>,
     nc_type: NetCDFType,
     vsize: usize,
     begin: u64,
@@ -29,7 +30,7 @@ impl NetCDFVariable {
     pub fn new(
         name: String,
         dims: Vec<u32>,
-        attributes: Option<Vec<NetCDFAttribute>>,
+        attributes: Option<AttributeHM>,
         nc_type: NetCDFType,
         vsize: usize,
         begin: u64,
@@ -127,9 +128,13 @@ pub fn attribute(i: &[u8]) -> HSEResult<&[u8], NetCDFAttribute> {
 }
 
 /// Parse a list of NetCDF attributes [combined]
-pub fn attribute_list(i: &[u8]) -> HSEResult<&[u8], Vec<NetCDFAttribute>> {
-    nom::multi::length_count(nelems, attribute)(i)
-    // TODO return HashMap instead of VectorList
+pub fn attribute_list(i: &[u8]) -> HSEResult<&[u8], AttributeHM> {
+    let (i, attrs) = nom::multi::length_count(nelems, attribute)(i)?;
+    let mut result: AttributeHM = HashMap::new();
+    for a in attrs.into_iter() {
+        result.insert(a.name.clone(), a);
+    }
+    Ok((i, result))
 }
 
 /// NetCDF Dimension
