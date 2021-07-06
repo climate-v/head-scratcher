@@ -42,9 +42,16 @@ fn main() -> std::io::Result<()> {
     file.read_to_end(&mut buffer).unwrap();
 
     let (_, h) = header(buffer.as_slice()).unwrap();
-    let vars = h.vars.unwrap();
-    for v in matches.values_of("variables").unwrap() {
-        println!("{:#?}", &vars[v]);
+    match matches.values_of("variables") {
+        // if variables are given, only print them
+        Some(variables) => {
+            let vars = h.vars.unwrap();
+            for v in variables.into_iter() {
+                println!("{:?}", vars[v])
+            }
+        }
+        // if no variables are given, only print global attributes
+        _ => println!("{:?}", h.attrs),
     }
     Ok(())
 }
