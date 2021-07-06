@@ -1,7 +1,9 @@
+use std::io::Read;
+
 use headscratcher::parser::header;
 use clap::{App, Arg, crate_authors, crate_version};
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let libv = crate_version!();
     let binv = "0.1.1";
     let v = format!("\nlib v{} \nbin v{}", libv, binv);
@@ -29,12 +31,14 @@ fn main() {
                         .help("Print all information about a data variable"))
                     .get_matches();
 
-    let i = include_bytes!("../assets/sresa1b_ncar_ccsm3-example.nc"); // TODO: Read actual file
-    let (_, h) = header(i).unwrap();
+    let mut file = std::fs::File::open(matches.value_of("INPUT").unwrap())?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).unwrap();
+
+    let (_, h) = header(buffer.as_slice()).unwrap();
     let vars = h.vars.unwrap();
     for v in matches.values_of("variables").unwrap() {
         println!("{:#?}", &vars[v]);
     }
-    // TODO: Print coordinate variable requests
-    // println!("Dimensions: {:#?}", h.dims);
+    Ok(())
 }
