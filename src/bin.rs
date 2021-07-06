@@ -47,11 +47,11 @@ fn main() -> std::io::Result<()> {
         Some(variables) => {
             let vars = h.vars.unwrap();
             for v in variables.into_iter() {
-                println!("{:?}", vars[v])
+                println!("{:#?}", vars[v])
             }
         }
         // if no variables are given, only print global attributes
-        _ => println!("{:?}", h.attrs),
+        _ => println!("{:#?}", h.attrs),
     }
     Ok(())
 }
