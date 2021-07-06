@@ -7,7 +7,10 @@ use crate::error::HeadScratcherError as HSE;
 use crate::parser::HSEResult;
 use nom::{
     bytes::streaming::tag,
-    number::streaming::{be_u32, be_u64, u8},
+    number::{
+        complete::{be_f32, be_f64, be_i16, be_i32},
+        streaming::{be_u32, be_u64, u8},
+    },
 };
 use std::collections::HashMap;
 pub type DimensionHM = HashMap<usize, NetCDFDimension>;
@@ -102,16 +105,39 @@ pub fn variable_list(i: &[u8], version: NetCDFVersion) -> HSEResult<&[u8], Varia
 pub struct NetCDFAttribute {
     name: String,
     nc_type: NetCDFType,
-    data: Vec<u8>, // TODO Add support for proper data
+    data: NetCDFTypeInstance,
 }
 
 impl NetCDFAttribute {
     /// Create a new NetCDF Attribute
     pub fn new(name: String, nc_type: NetCDFType, data: Vec<u8>) -> Self {
+        let value = match nc_type {
+            NetCDFType::NC_CHAR => {
+                let text = std::str::from_utf8(&data[..]).unwrap();
+                NetCDFTypeInstance::STRING(text.to_string())
+            }
+            NetCDFType::NC_FLOAT => {
+                let (_, v) = float(data.as_slice()).unwrap();
+                NetCDFTypeInstance::FLOAT(v)
+            }
+            NetCDFType::NC_DOUBLE => {
+                let (_, v) = double(data.as_slice()).unwrap();
+                NetCDFTypeInstance::DOUBLE(v)
+            }
+            NetCDFType::NC_INT => {
+                let (_, v) = integer(data.as_slice()).unwrap();
+                NetCDFTypeInstance::INT(v)
+            }
+            NetCDFType::NC_SHORT => {
+                let (_, v) = short(data.as_slice()).unwrap();
+                NetCDFTypeInstance::SHORT(v)
+            }
+            NetCDFType::NC_BYTE => NetCDFTypeInstance::_RAW(data),
+        };
         NetCDFAttribute {
             name,
             nc_type,
-            data,
+            data: value,
         }
     }
 }
@@ -119,11 +145,13 @@ impl NetCDFAttribute {
 /// Parse a single NetCDF attribute [combined]
 pub fn attribute(i: &[u8]) -> HSEResult<&[u8], NetCDFAttribute> {
     let (i, (name, nc_type, nelems)) = nom::sequence::tuple((name, nc_type, nelems))(i)?;
-    let (i, data) = nom::bytes::streaming::take(nelems)(i)?;
+    let (i, data) = nom::bytes::streaming::take(nc_type.extsize() * nelems as usize)(i)?;
     // names are padded to the next 4-byte boundary
-    let drop = padding(nelems);
+    // println!("{:?} {:?} {:?} {:?}", name, nc_type, nelems, data);
+    let drop = padding(nc_type.extsize() as u32 * nelems);
     let (i, _) = nom::bytes::streaming::take(drop as u8)(i)?;
     let result = NetCDFAttribute::new(name.to_string(), nc_type, data.to_vec());
+    // println!("{:?}", result);
     Ok((i, result))
 }
 
@@ -166,6 +194,18 @@ pub fn dimension_list(i: &[u8]) -> HSEResult<&[u8], DimensionHM> {
         result.insert(i, d);
     }
     Ok((i, result))
+}
+
+/// NetCDF attribute value
+#[derive(Debug, PartialEq)]
+pub enum NetCDFTypeInstance {
+    STRING(String),
+    CHAR(u8),
+    SHORT(i16),
+    INT(i32),
+    FLOAT(f32),
+    DOUBLE(f64),
+    _RAW(Vec<u8>),
 }
 
 /// NetCDF data format types
@@ -216,6 +256,26 @@ pub fn nelems(i: &[u8]) -> HSEResult<&[u8], u32> {
 /// Parse non negative numbers [atomic]
 pub fn non_neg(i: &[u8]) -> HSEResult<&[u8], u32> {
     be_u32(i)
+}
+
+/// Parse float [atomic]
+pub fn float(i: &[u8]) -> HSEResult<&[u8], f32> {
+    be_f32(i)
+}
+
+/// Parse integer [atomic]
+pub fn integer(i: &[u8]) -> HSEResult<&[u8], i32> {
+    be_i32(i)
+}
+
+/// Parse short [atomic]
+pub fn short(i: &[u8]) -> HSEResult<&[u8], i16> {
+    be_i16(i)
+}
+
+/// Parse double [atomic]
+pub fn double(i: &[u8]) -> HSEResult<&[u8], f64> {
+    be_f64(i)
 }
 
 /// Parse dimension length [atomic]
