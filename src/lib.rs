@@ -19,10 +19,15 @@ fn product_vector(vecs: &[usize], record: bool) -> Vec<usize> {
 mod tests {
     use super::*;
 
-    // #[test]
-    // fn test_read_netcdf() {
-    //     let path = "assets/sresa1b_ncar_ccsm3-example.nc";
-    //     let file = netcdf::open(path).unwrap();
+    #[test]
+    fn test_read_netcdf() {
+        let nc = include_bytes!("../assets/sresa1b_ncar_ccsm3-example.nc");
+        let (_, header) = parser::header(nc).unwrap();
+        let path = "assets/sresa1b_ncar_ccsm3-example.nc";
+        let mut file = std::fs::File::open(path).unwrap();
+        let val = read_first_f32(header, "tas".to_string(), None, None, &mut file);
+        assert_eq!(val, 215.8935)
+    }
     //     let var = &file.variable("tas").unwrap();
     //     let first: f32 = var.value(None).unwrap();
     //     assert_eq!(first, 215.8935);

@@ -23,9 +23,9 @@ pub struct NetCDFVariable {
     name: String,
     dims: Vec<u32>,
     attributes: Option<AttributeHM>,
-    nc_type: NetCDFType,
+    pub nc_type: NetCDFType,
     vsize: usize,
-    begin: u64,
+    pub begin: u64,
 }
 
 impl NetCDFVariable {
