@@ -1,4 +1,7 @@
 //! Netcdf Head Scratcher - Library for stream parsing netcdf files
+use std::io::{Read, Seek, SeekFrom};
+
+use parser::NetCDFHeader;
 pub mod constants_and_types;
 pub mod error;
 pub mod parser;
@@ -12,6 +15,23 @@ fn product_vector(vecs: &[usize], record: bool) -> Vec<usize> {
         result.insert(0, prod);
     }
     result
+}
+
+fn read_first_f32<S: Seek + Read>(
+    header: NetCDFHeader,
+    var: String,
+    time: Option<usize>,
+    lev: Option<usize>,
+    file: &mut S,
+) -> f32 {
+    let vars = header.vars.unwrap();
+    let pos = vars[&var].begin;
+    file.seek(SeekFrom::Start(pos)).unwrap();
+
+    let mut contents = vec![0u8; 4];
+    file.read_exact(&mut contents).unwrap();
+    let (_, val) = parser::components::float(&contents).unwrap();
+    val
 }
 
 #[cfg(test)]
