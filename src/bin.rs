@@ -21,7 +21,7 @@ fn main() -> std::io::Result<()> {
             Arg::with_name("dimensions")
                 .short("d")
                 .long("dimension")
-                .value_name("DIMENSION NUMBER")
+                .value_name("INDEX")
                 .takes_value(true)
                 .multiple(true)
                 .help("Print all information about a dimension (i.e. coordinate variable)"),
@@ -30,10 +30,26 @@ fn main() -> std::io::Result<()> {
             Arg::with_name("variables")
                 .short("v")
                 .long("variable")
-                .value_name("VARIABLE")
+                .value_name("VARIABLENAME")
                 .takes_value(true)
                 .multiple(true)
                 .help("Print all information about a data variable"),
+        )
+        .arg(
+            Arg::with_name("time")
+                .short("t")
+                .long("time")
+                .value_name("INDEX")
+                .takes_value(true)
+                .help("Index position for time coordinate"),
+        )
+        .arg(
+            Arg::with_name("level")
+                .short("l")
+                .long("level")
+                .value_name("INDEX")
+                .takes_value(true)
+                .help("Index position for altitude coordinate"),
         )
         .arg(
             Arg::with_name("global")
