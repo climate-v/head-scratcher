@@ -1,34 +1,37 @@
 //! Netcdf Head Scratcher - Library for stream parsing netcdf files
-use std::io::{Read, Seek, SeekFrom};
-
+use crate::parser::{components::VariableHM, SeeksHM};
 use parser::NetCDFHeader;
+use std::io::{Read, Seek, SeekFrom};
 pub mod constants_and_types;
-pub mod error;
+mod error;
 pub mod parser;
 mod utils;
 
 pub fn update_buffer<F: Seek + Read>(
-    header: NetCDFHeader,
-    var: String,
-    start: Vec<usize>,
+    header: &NetCDFHeader,
+    var: &String,
+    start: &[usize],
     file: &mut F,
     buffer: &mut [u8],
 ) -> Result<(), std::io::Error> {
-    let seek_pos = match header.vars {
-        Some(vars) => {
-            let v = vars.get(&var).unwrap();
-            assert!(v.dims.len() == start.len(), "Lengths are different");
-            let offset: usize = start
-                .iter()
-                .zip(header.seeks.unwrap().get(&var).unwrap())
-                .map(|(a, b)| a * b)
-                .sum();
-            offset as u64 * v.nc_type.extsize() as u64 + v.begin
-        }
-        None => panic!("Could not find variable '{:?}'", var),
+    let seek_pos = match (&header.vars, &header.seeks) {
+        (Some(v), Some(s)) => calc_seek(v, s, var, start),
+        (_, _) => None,
     };
-    file.seek(SeekFrom::Start(seek_pos))?;
+    file.seek(SeekFrom::Start(seek_pos.unwrap()))?;
     file.read_exact(buffer)
+}
+
+fn calc_seek(v: &VariableHM, s: &SeeksHM, name: &String, start: &[usize]) -> Option<u64> {
+    match (v.get(name), s.get(name)) {
+        (Some(va), Some(se)) => {
+            assert!(va.dims.len() == start.len(), "Lengths are different");
+            let offset: usize = start.iter().zip(se).map(|(a, b)| a * b).sum();
+            let result = offset as u64 * va.nc_type.extsize() as u64 + va.begin;
+            Some(result)
+        }
+        (_, _) => None,
+    }
 }
 
 #[cfg(test)]
@@ -53,9 +56,9 @@ mod tests {
         let mut file = std::fs::File::open(path).unwrap();
         let mut buffer = vec![0u8; 4];
         update_buffer(
-            header,
-            "tas".to_string(),
-            vec![0, 0, 0],
+            &header,
+            &"tas".to_string(),
+            &vec![0, 0, 0],
             &mut file,
             &mut buffer,
         )
