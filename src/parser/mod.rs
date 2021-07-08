@@ -184,4 +184,10 @@ mod tests {
         let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.3_nc64.nc");
         let (i, header) = header(i).unwrap();
     }
+
+    #[test]
+    fn from_file_nc3_classic() {
+        let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
+        let h = NetCDFHeader::from_file(filename).unwrap();
+    }
 }
