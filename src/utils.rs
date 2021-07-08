@@ -1,3 +1,5 @@
+use crate::parser::{components::VariableHM, SeeksHM};
+
 pub(crate) fn product_vector(vecs: &[usize], _record: bool) -> Vec<usize> {
     // https://cluster.earlham.edu/bccd-ng/testing/mobeen/GALAXSEEHPC/netcdf-4.1.3/man4/netcdf.html#Computing-Offsets
     let mut prod = 1usize;
@@ -7,6 +9,23 @@ pub(crate) fn product_vector(vecs: &[usize], _record: bool) -> Vec<usize> {
         result.insert(0, prod);
     }
     result
+}
+
+pub(crate) fn calc_seek(
+    v: &VariableHM,
+    s: &SeeksHM,
+    name: &String,
+    start: &[usize],
+) -> Option<u64> {
+    match (v.get(name), s.get(name)) {
+        (Some(va), Some(se)) => {
+            assert!(va.dims.len() == start.len(), "Lengths are different");
+            let offset: usize = start.iter().zip(se).map(|(a, b)| a * b).sum();
+            let result = offset as u64 * va.nc_type.extsize() as u64 + va.begin;
+            Some(result)
+        }
+        (_, _) => None,
+    }
 }
 
 #[cfg(test)]

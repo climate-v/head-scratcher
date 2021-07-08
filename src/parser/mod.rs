@@ -3,7 +3,7 @@
 //! # Parser
 //! Main parsing module
 use crate::error::HeadScratcherError as HSE;
-use crate::utils::product_vector;
+use crate::utils::{calc_seek, product_vector};
 use components::{
     self as cp, AttributeHM, DimensionHM, ListType, NetCDFVersion, NumberOfRecords, VariableHM,
 };
@@ -14,6 +14,7 @@ pub mod components;
 
 pub type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 pub type SeeksHM = HashMap<String, Vec<usize>>;
+use std::io::{Read, Seek, SeekFrom};
 
 /// NetCDF file format
 #[derive(Debug, PartialEq)]
@@ -43,6 +44,20 @@ impl NetCDFHeader {
             vars,
             seeks,
         }
+    }
+    pub fn update_buffer<F: Seek + Read>(
+        &self,
+        var: &String,
+        start: &[usize],
+        file: &mut F,
+        buffer: &mut [u8],
+    ) -> Result<(), std::io::Error> {
+        let seek_pos = match (&self.vars, &self.seeks) {
+            (Some(v), Some(s)) => calc_seek(v, s, var, start),
+            (_, _) => None,
+        };
+        file.seek(SeekFrom::Start(seek_pos.unwrap()))?;
+        file.read_exact(buffer)
     }
 }
 
