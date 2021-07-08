@@ -1,4 +1,3 @@
-
 pub(crate) fn product_vector(vecs: &[usize], _record: bool) -> Vec<usize> {
     // https://cluster.earlham.edu/bccd-ng/testing/mobeen/GALAXSEEHPC/netcdf-4.1.3/man4/netcdf.html#Computing-Offsets
     let mut prod = 1usize;

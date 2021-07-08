@@ -3,17 +3,17 @@
 //! # Parser
 //! Main parsing module
 use crate::error::HeadScratcherError as HSE;
+use crate::utils::product_vector;
 use components::{
     self as cp, AttributeHM, DimensionHM, ListType, NetCDFVersion, NumberOfRecords, VariableHM,
 };
 use nom::IResult;
 use std::collections::HashMap;
-use crate::utils::product_vector;
 
 pub mod components;
 
 pub type HSEResult<I, O> = IResult<I, O, HSE<I>>;
-type SeeksHM = HashMap<String, Vec<usize>>;
+pub type SeeksHM = HashMap<String, Vec<usize>>;
 
 /// NetCDF file format
 #[derive(Debug, PartialEq)]
