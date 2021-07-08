@@ -8,6 +8,7 @@ use components::{
 };
 use nom::IResult;
 use std::collections::HashMap;
+use crate::utils::product_vector;
 
 pub mod components;
 
@@ -104,7 +105,7 @@ fn clc(vars: &VariableHM, dims: &DimensionHM) -> SeeksHM {
         for d in v.dims.iter() {
             seeks.push(dims[&(*d as usize)].length)
         }
-        let mut seeks = crate::product_vector(&seeks, false);
+        let mut seeks = product_vector(&seeks, false);
         seeks.push(1);
         seeks.remove(0);
         result.insert(k.clone(), seeks);
