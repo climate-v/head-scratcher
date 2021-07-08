@@ -11,6 +11,7 @@ nom = "6.*"
 clap  = { version = "2.*.*", optional = true }
 
 [dev-dependencies]
+byteorder = "1.4.*"
 # netcdf = "0.6.*"
 
 [features]

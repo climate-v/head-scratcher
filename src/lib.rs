@@ -45,9 +45,18 @@ pub fn update_buffer<F: Seek + Read>(
 #[allow(unused_imports)]
 mod tests {
     use super::*;
+    use byteorder::ReadBytesExt;
+
+    fn vec_to_data(buffer: &[u8]) -> Vec<f32> {
+        let mut result = vec![0f32; buffer.len() / 4];
+        std::io::Cursor::new(buffer)
+            .read_f32_into::<byteorder::BigEndian>(&mut result)
+            .unwrap();
+        result
+    }
 
     #[test]
-    fn test_read_level_netcdf() {
+    fn test_read_netcdf() {
         let nc = include_bytes!("../assets/sresa1b_ncar_ccsm3-example.nc");
         let (_, header) = parser::header(nc).unwrap();
         let path = "assets/sresa1b_ncar_ccsm3-example.nc";
@@ -61,8 +70,7 @@ mod tests {
             &mut buffer,
         )
         .unwrap();
-        let (_, f) = parser::components::float(&buffer).unwrap();
-        assert_eq!(f, 215.8935);
+        assert_eq!(vec_to_data(&buffer), vec![215.8935]);
         assert_eq!(buffer, vec![67, 87, 228, 188]);
     }
 
