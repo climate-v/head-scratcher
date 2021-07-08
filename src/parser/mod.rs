@@ -16,6 +16,8 @@ pub type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 pub type SeeksHM = HashMap<String, Vec<usize>>;
 use std::io::{Read, Seek, SeekFrom};
 
+const BUFFER: usize = 4096; // bytes
+
 /// NetCDF file format
 #[derive(Debug, PartialEq)]
 pub struct NetCDFHeader {
@@ -60,19 +62,18 @@ impl NetCDFHeader {
         file.read_exact(buffer)
     }
     pub fn from_file(filename: String) -> Result<NetCDFHeader, std::io::Error> {
-        // let mut buf: Vec<u8> = vec![0; 2_767_916]; // File size
-        let mut buf: Vec<u8> = vec![0; 0_001_024]; // Too small
+        let mut buf: Vec<u8> = vec![0; BUFFER];
         let mut file = std::fs::File::open(filename)?;
-        let count = file.read(&mut buf)?;
-        let result = header(&buf[..count]);
-        match result {
-            Ok((_, h)) => return Ok(h),
-            Err(err) => {
-                match err {
-                    nom::Err::Incomplete(n) => panic!("Not enough data {:?}", n),
-                    _ => panic!("Other error")
-                }
-            },
+        let mut head: Vec<u8> = Vec::new();
+        loop {
+            let count = file.read(&mut buf)?;
+            head.append(&mut buf[..count].to_vec());
+            let result = header(&head);
+            match result {
+                Ok((_, h)) => return Ok(h),
+                Err(nom::Err::Incomplete(nom::Needed::Size(_))) => (),
+                Err(err) => panic!("Other error: {:?}", err),
+            }
         }
     }
 }
