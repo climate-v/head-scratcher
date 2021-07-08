@@ -21,7 +21,7 @@ pub type AttributeHM = HashMap<String, NetCDFAttribute>;
 #[derive(Debug, PartialEq)]
 pub struct NetCDFVariable {
     name: String,
-    dims: Vec<u32>,
+    pub dims: Vec<u32>,
     attributes: Option<AttributeHM>,
     pub nc_type: NetCDFType,
     vsize: usize,
@@ -169,7 +169,7 @@ pub fn attribute_list(i: &[u8]) -> HSEResult<&[u8], AttributeHM> {
 #[derive(Debug, PartialEq)]
 pub struct NetCDFDimension {
     name: String,
-    length: usize,
+    pub length: usize,
 }
 
 impl NetCDFDimension {
