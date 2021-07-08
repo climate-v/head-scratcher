@@ -34,26 +34,20 @@ fn read_first_f32<S: Seek + Read>(
     val
 }
 
-fn read_vector_f32<S: Seek + Read>(
+fn update_buffer<F: Seek + Read>(
     header: NetCDFHeader,
     var: String,
     time: Option<usize>,
     lev: Option<usize>,
-    file: &mut S,
-) -> Vec<f32> {
+    file: &mut F,
+    buffer: &mut [u8],
+) -> Result<(), std::io::Error> {
     let vars = header.vars.unwrap();
-    let pos = vars[&var].begin;
-    file.seek(SeekFrom::Start(pos)).unwrap();
-
-    let lon_ix = vars["lon"].dims[0];
-    let lat_ix = vars["lat"].dims[0];
-    let dims = header.dims.unwrap();
-    let buffer_size = dims[&(lon_ix as usize)].length * dims[&(lat_ix as usize)].length;
-
-    let mut contents = vec![0u8; buffer_size * 4];
-    file.read_exact(&mut contents).unwrap();
-    let (_, val) = nom::multi::count(parser::components::float, buffer_size)(&contents).unwrap();
-    val
+    let seek_pos = vars[&var].begin;
+    let time_idx = time.unwrap_or(1);
+    let lev_idx = lev.unwrap_or(1);
+    file.seek(SeekFrom::Start(seek_pos))?;
+    file.read_exact(buffer)
 }
 
 #[cfg(test)]
@@ -86,9 +80,18 @@ mod tests {
         let (_, header) = parser::header(nc).unwrap();
         let path = "assets/sresa1b_ncar_ccsm3-example.nc";
         let mut file = std::fs::File::open(path).unwrap();
-        let val = read_vector_f32(header, "tas".to_string(), None, None, &mut file);
+        let mut buffer = vec![0u8; 4];
+        update_buffer(
+            header,
+            "tas".to_string(),
+            None,
+            None,
+            &mut file,
+            &mut buffer,
+        )
+        .unwrap();
 
-        assert_eq!(val, vec![215.8935])
+        assert_eq!(buffer, vec![67, 87, 228, 188])
     }
 
     #[test]
