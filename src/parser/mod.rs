@@ -7,11 +7,12 @@ use components::{
     self as cp, AttributeHM, DimensionHM, ListType, NetCDFVersion, NumberOfRecords, VariableHM,
 };
 use nom::IResult;
+use std::collections::HashMap;
 
 pub mod components;
 
 pub type HSEResult<I, O> = IResult<I, O, HSE<I>>;
-// type AttributeHM = HashMap<String, String>;
+type SeeksHM = HashMap<String, Vec<usize>>;
 
 /// NetCDF file format
 #[derive(Debug, PartialEq)]
@@ -21,6 +22,7 @@ pub struct NetCDFHeader {
     pub attrs: Option<AttributeHM>,
     pub dims: Option<DimensionHM>,
     pub vars: Option<VariableHM>,
+    pub seeks: Option<SeeksHM>,
 }
 
 impl NetCDFHeader {
@@ -30,6 +32,7 @@ impl NetCDFHeader {
         attrs: Option<AttributeHM>,
         dims: Option<DimensionHM>,
         vars: Option<VariableHM>,
+        seeks: Option<SeeksHM>,
     ) -> Self {
         NetCDFHeader {
             version,
@@ -37,6 +40,7 @@ impl NetCDFHeader {
             attrs,
             dims,
             vars,
+            seeks,
         }
     }
 }
@@ -79,9 +83,33 @@ pub fn header(i: &[u8]) -> HSEResult<&[u8], NetCDFHeader> {
         _ => Err(nom::Err::Error(HSE::EmptyError))?,
     };
 
-    let result = NetCDFHeader::new(version, kind, attrs, dims, vars);
+    // Seek calculation
+    let seeks = calculate_seeks(&vars, &dims);
+    let result = NetCDFHeader::new(version, kind, attrs, dims, vars, seeks);
 
     Ok((i, result))
+}
+
+fn calculate_seeks(vars: &Option<VariableHM>, dims: &Option<DimensionHM>) -> Option<SeeksHM> {
+    match (vars, dims) {
+        (Some(v), Some(d)) => Some(clc(v, d)),
+        (_, _) => None,
+    }
+}
+
+fn clc(vars: &VariableHM, dims: &DimensionHM) -> SeeksHM {
+    let mut result: HashMap<String, Vec<usize>> = HashMap::new();
+    for (k, v) in vars.iter() {
+        let mut seeks: Vec<usize> = Vec::new();
+        for d in v.dims.iter() {
+            seeks.push(dims[&(*d as usize)].length)
+        }
+        let mut seeks = crate::product_vector(&seeks, false);
+        seeks.push(1);
+        seeks.remove(0);
+        result.insert(k.clone(), seeks);
+    }
+    result
 }
 
 #[cfg(test)]
@@ -110,6 +138,29 @@ mod tests {
     fn file_nc3_classic() {
         let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
         let (i, header) = header(i).unwrap();
+    }
+
+    #[test]
+    fn test_seeks() {
+        let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
+        let (i, header) = header(i).unwrap();
+        let seeks = calculate_seeks(&header.vars, &header.dims).unwrap();
+        let expected = vec![
+            ("plev".to_string(), vec![1usize]),
+            ("lon".to_string(), vec![1]),
+            ("lat".to_string(), vec![1]),
+            ("time".to_string(), vec![1]),
+            ("area".to_string(), vec![256, 1]),
+            ("msk_rgn".to_string(), vec![256, 1]),
+            ("pr".to_string(), vec![32768, 256, 1]),
+            ("tas".to_string(), vec![32768, 256, 1]),
+            ("ua".to_string(), vec![557056, 32768, 256, 1]),
+        ];
+        for (v, e) in expected.iter() {
+            println!("{:?}", v);
+            let calculated = &seeks[v];
+            assert_eq!(calculated, e)
+        }
     }
 
     #[test]
