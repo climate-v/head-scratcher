@@ -7,8 +7,6 @@ mod utils;
 #[cfg(test)]
 mod tests {
     use crate::parser::NetCDFHeader;
-
-    use super::*;
     use byteorder::ReadBytesExt;
 
     fn vec_to_data(buffer: &[u8]) -> Vec<f32> {
