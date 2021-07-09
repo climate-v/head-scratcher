@@ -152,31 +152,36 @@ mod tests {
 
     #[test]
     fn file_example_empty() {
-        let i = include_bytes!("../../assets/empty.nc");
-        let (i, header) = header(i).unwrap();
+        let filename = "assets/empty.nc".to_string();
+        let h = NetCDFHeader::from_file(filename).unwrap();
     }
     #[test]
     fn file_example_small() {
-        let i = include_bytes!("../../assets/small.nc");
-        let (i, header) = header(i).unwrap();
+        let filename = "assets/small.nc".to_string();
+        let h = NetCDFHeader::from_file(filename).unwrap();
     }
 
     #[test]
     fn file_example_compressible() {
-        let i = include_bytes!("../../assets/testrh.nc");
-        let (i, header) = header(i).unwrap();
+        let filename = "assets/testrh.nc".to_string();
+        let h = NetCDFHeader::from_file(filename).unwrap();
     }
 
     #[test]
     fn file_nc3_classic() {
-        let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
-        let (i, header) = header(i).unwrap();
+        let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
+        let h = NetCDFHeader::from_file(filename).unwrap();
+    }
+    #[test]
+    fn file_nc3_64offset() {
+        let filename = "assets/sresa1b_ncar_ccsm3-example.3_nc64.nc".to_string();
+        let h = NetCDFHeader::from_file(filename).unwrap();
     }
 
     #[test]
     fn test_seeks() {
-        let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
-        let (i, header) = header(i).unwrap();
+        let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
+        let header = NetCDFHeader::from_file(filename).unwrap();
         let seeks = calculate_seeks(&header.vars, &header.dims).unwrap();
         let expected = vec![
             ("plev".to_string(), vec![1usize]),
@@ -194,17 +199,5 @@ mod tests {
             let calculated = &seeks[v];
             assert_eq!(calculated, e)
         }
-    }
-
-    #[test]
-    fn file_nc3_64offset() {
-        let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.3_nc64.nc");
-        let (i, header) = header(i).unwrap();
-    }
-
-    #[test]
-    fn from_file_nc3_classic() {
-        let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
-        let h = NetCDFHeader::from_file(filename).unwrap();
     }
 }

@@ -6,6 +6,8 @@ mod utils;
 
 #[cfg(test)]
 mod tests {
+    use crate::parser::NetCDFHeader;
+
     use super::*;
     use byteorder::ReadBytesExt;
 
@@ -19,8 +21,8 @@ mod tests {
 
     #[test]
     fn test_read_netcdf() {
-        let nc = include_bytes!("../assets/sresa1b_ncar_ccsm3-example.nc");
-        let (_, header) = parser::header(nc).unwrap();
+        let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
+        let header = NetCDFHeader::from_file(filename).unwrap();
         let path = "assets/sresa1b_ncar_ccsm3-example.nc";
         let mut file = std::fs::File::open(path).unwrap();
         let mut buffer = vec![0u8; 4];

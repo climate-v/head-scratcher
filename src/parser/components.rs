@@ -411,11 +411,15 @@ pub fn eof(i: &[u8]) -> HSEResult<&[u8], bool> {
 mod tests {
     use super::*;
     use core::panic;
+    use std::{fs::File, io::BufReader, io::Read};
 
     #[test]
     fn file_example_empty() {
-        let i = include_bytes!("../../assets/empty.nc");
-        let (i, o) = initials(i).unwrap();
+        let file = File::open("assets/empty.nc").unwrap();
+        let mut reader = BufReader::new(file);
+        let mut i = Vec::new();
+        reader.read_to_end(&mut i).unwrap();
+        let (i, o) = initials(&i[..]).unwrap();
         assert_eq!(o, b"CDF");
         let (i, o) = nc_version(i).unwrap();
         assert_eq!(o, NetCDFVersion::Classic);
@@ -433,8 +437,11 @@ mod tests {
 
     #[test]
     fn file_example_small() {
-        let i = include_bytes!("../../assets/small.nc");
-        let (i, o) = initials(i).unwrap();
+        let file = File::open("assets/small.nc").unwrap();
+        let mut reader = BufReader::new(file);
+        let mut i = Vec::new();
+        reader.read_to_end(&mut i).unwrap();
+        let (i, o) = initials(&i[..]).unwrap();
         assert_eq!(o, b"CDF");
         let (i, o) = nc_version(i).unwrap();
         assert_eq!(o, NetCDFVersion::Classic);
@@ -451,8 +458,11 @@ mod tests {
 
     #[test]
     fn file_example_compressible() {
-        let i = include_bytes!("../../assets/testrh.nc");
-        let (i, o) = initials(i).unwrap();
+        let file = File::open("assets/testrh.nc").unwrap();
+        let mut reader = BufReader::new(file);
+        let mut i = Vec::new();
+        reader.read_to_end(&mut i).unwrap();
+        let (i, o) = initials(&i[..]).unwrap();
         assert_eq!(o, b"CDF");
         let (i, o) = nc_version(i).unwrap();
         assert_eq!(o, NetCDFVersion::Classic);
@@ -469,8 +479,11 @@ mod tests {
 
     #[test]
     fn file_nc3_classic() {
-        let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.nc");
-        let (i, o) = initials(i).unwrap();
+        let file = File::open("assets/sresa1b_ncar_ccsm3-example.nc").unwrap();
+        let mut reader = BufReader::new(file);
+        let mut i = Vec::new();
+        reader.read_to_end(&mut i).unwrap();
+        let (i, o) = initials(&i[..]).unwrap();
         assert_eq!(o, b"CDF");
         let (i, v) = nc_version(i).unwrap();
         assert_eq!(v, NetCDFVersion::Classic);
@@ -512,8 +525,11 @@ mod tests {
 
     #[test]
     fn file_nc3_64offset() {
-        let i = include_bytes!("../../assets/sresa1b_ncar_ccsm3-example.3_nc64.nc");
-        let (i, o) = initials(i).unwrap();
+        let file = File::open("assets/sresa1b_ncar_ccsm3-example.3_nc64.nc").unwrap();
+        let mut reader = BufReader::new(file);
+        let mut i = Vec::new();
+        reader.read_to_end(&mut i).unwrap();
+        let (i, o) = initials(&i[..]).unwrap();
         assert_eq!(o, b"CDF");
         let (i, v) = nc_version(i).unwrap();
         assert_eq!(v, NetCDFVersion::Offset64);
@@ -561,14 +577,20 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_initials_hdf() {
-        let f = include_bytes!("../../assets/test_hgroups.nc");
-        magic(f).unwrap();
+        let file = File::open("assets/test_hgroups.nc").unwrap();
+        let mut reader = BufReader::new(file);
+        let mut i = Vec::new();
+        reader.read_to_end(&mut i).unwrap();
+        magic(&i[..]).unwrap();
     }
 
     #[test]
     fn test_wrong_version() {
-        let f = include_bytes!("../../assets/test_hgroups.nc");
-        let e = nc_version(f).unwrap_err();
+        let file = File::open("assets/test_hgroups.nc").unwrap();
+        let mut reader = BufReader::new(file);
+        let mut i = Vec::new();
+        reader.read_to_end(&mut i).unwrap();
+        let e = nc_version(&i[..]).unwrap_err();
         match e {
             nom::Err::Error(e) => assert_eq!(e, HSE::UnsupportedNetCDFVersion),
             _ => panic!("Unexpected error {:?}", e),
