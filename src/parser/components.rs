@@ -168,7 +168,7 @@ pub fn attribute_list(i: &[u8]) -> HSEResult<&[u8], AttributeHM> {
 /// NetCDF Dimension
 #[derive(Debug, PartialEq)]
 pub struct NetCDFDimension {
-    name: String,
+    pub(crate) name: String,
     pub length: usize,
 }
 

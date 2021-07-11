@@ -49,7 +49,7 @@ impl NetCDFHeader {
     }
     pub fn update_buffer<F: Seek + Read>(
         &self,
-        var: &String,
+        var: String,
         start: &[usize],
         file: &mut F,
         buffer: &mut [u8],

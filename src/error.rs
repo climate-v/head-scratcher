@@ -23,6 +23,16 @@ pub enum HeadScratcherError<I> {
     UnknownNetCDFType(usize),
     /// Error caused by parsing library
     NomError(I, NomErrorKind),
+    /// IO Error
+    IOError(std::io::ErrorKind),
+    /// Empty Variable list
+    NoVariablesInFile,
+    /// Empty Dimension list
+    NoDimensionsInFile,
+    /// Variable not in variable list
+    VariableNotFound(String),
+    /// Search for Dimensions unsuccessful
+    CouldNotFindDimension(String),
 }
 
 impl<I> nom::error::ParseError<I> for HeadScratcherError<I> {
@@ -31,6 +41,12 @@ impl<I> nom::error::ParseError<I> for HeadScratcherError<I> {
     }
     fn append(_: I, _: NomErrorKind, other: Self) -> Self {
         other
+    }
+}
+
+impl<I> From<std::io::Error> for HeadScratcherError<I> {
+    fn from(err: std::io::Error) -> Self {
+        HeadScratcherError::IOError(err.kind())
     }
 }
 
