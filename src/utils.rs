@@ -28,6 +28,21 @@ pub(crate) fn calc_seek(
     }
 }
 
+pub(crate) fn get_coordinate_dim_id(
+    dims: &DimensionHM,
+    candidates: &[&str],
+) -> Result<usize, HeadScratcherError<String>> {
+    for (k, d) in dims.iter() {
+        if candidates.contains(&&*d.name) {
+            return Ok(*k);
+        } else {
+            continue;
+        }
+    }
+    let msg = format!("Candidate space: {:?}", candidates);
+    Err(HeadScratcherError::CouldNotFindDimension(msg))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
