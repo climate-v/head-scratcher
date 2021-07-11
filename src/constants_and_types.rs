@@ -29,6 +29,6 @@ pub type NON_NEG = u32;
 
 // Naming standards
 pub const LONGITUDE_CANDIDATES: &[&str] = &["lon", "longitude"];
-pub const LATITUDE_CANDIDATES: &[&str] = &["lat", "latitude"];
-pub const ALTITUDE_CANDIDATES: &[&str] = &["lev", "level", "alt", "height"];
-pub const TIME_CANDIDATES: &[&str] = &["time"];
+pub const LATITUDE_CANDIDATES:  &[&str] = &["lat", "latitude"];
+pub const ALTITUDE_CANDIDATES:  &[&str] = &["lev", "level", "alt", "height"];
+pub const TIME_CANDIDATES:      &[&str] = &["time"];

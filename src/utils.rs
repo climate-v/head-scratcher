@@ -1,7 +1,7 @@
 use crate::{
-    error::HeadScratcherError,
-    parser::components::DimensionHM,
-    parser::{components::VariableHM, SeeksHM},
+    error::HeadScratcherError as HSE,
+    parser::components::{DimensionHM, VariableHM},
+    parser::SeeksHM,
 };
 
 pub(crate) fn product_vector(vecs: &[usize], _record: bool) -> Vec<usize> {
@@ -30,7 +30,7 @@ pub(crate) fn calc_seek(v: &VariableHM, s: &SeeksHM, name: String, start: &[usiz
 pub(crate) fn get_coordinate_dim_id(
     dims: &DimensionHM,
     candidates: &[&str],
-) -> Result<usize, HeadScratcherError<String>> {
+) -> Result<usize, HSE<String>> {
     for (k, d) in dims.iter() {
         if candidates.contains(&&*d.name) {
             return Ok(*k);
@@ -39,7 +39,7 @@ pub(crate) fn get_coordinate_dim_id(
         }
     }
     let msg = format!("Candidate space: {:?}", candidates);
-    Err(HeadScratcherError::CouldNotFindDimension(msg))
+    Err(HSE::CouldNotFindDimension(msg))
 }
 
 #[cfg(test)]

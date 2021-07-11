@@ -9,13 +9,10 @@ use components::{
 };
 use nom::IResult;
 use std::collections::HashMap;
-
+use std::io::{Read, Seek, SeekFrom};
 pub mod components;
-
 pub type HSEResult<I, O> = IResult<I, O, HSE<I>>;
 pub type SeeksHM = HashMap<String, Vec<usize>>;
-use std::io::{Read, Seek, SeekFrom};
-
 const BUFFER: usize = 4096; // bytes
 
 /// NetCDF file format
@@ -68,10 +65,9 @@ impl NetCDFHeader {
         loop {
             let count = file.read(&mut buf)?;
             head.append(&mut buf[..count].to_vec());
-            let result = header(&head);
-            match result {
+            match header(&head) {
                 Ok((_, h)) => return Ok(h),
-                Err(nom::Err::Incomplete(nom::Needed::Size(_))) => (),
+                Err(nom::Err::Incomplete(nom::Needed::Size(_))) => continue,
                 Err(err) => panic!("Other error: {:?}", err),
             }
         }

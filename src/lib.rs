@@ -4,7 +4,6 @@ use parser::NetCDFHeader;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use utils::calc_seek;
-
 pub mod constants_and_types;
 mod error;
 pub mod parser;
@@ -77,7 +76,7 @@ impl NetCDF<File> {
                     }
                 };
             }
-            _ => return Err(HeadScratcherError::NoDimensionsInFile),
+            _ => Err(HeadScratcherError::NoDimensionsInFile),
         }
     }
 }
