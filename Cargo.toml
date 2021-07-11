@@ -22,5 +22,5 @@ name = "headscratcher"
 
 [[bin]]
 name = "headscratcher"
-path = "src/bin.rs"
+path = "bins/headscratcher.rs"
 required-features = ["binary"]
