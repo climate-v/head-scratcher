@@ -81,18 +81,28 @@ impl NetCDF<File> {
     }
 }
 
+#[cfg(features = "border")]
+use byteorder::ReadBytesExt;
+
+#[cfg(features = "border")]
+pub fn vec_to_data(buffer: &[u8]) -> Vec<f32> {
+    let mut result = vec![0f32; buffer.len() / 4];
+    std::io::Cursor::new(buffer)
+        .read_f32_into::<byteorder::BigEndian>(&mut result)
+        .unwrap();
+    result
+}
+
+#[cfg(not(features = "border"))]
+pub fn vec_to_data(buffer: &[u8]) -> Vec<f32> {
+    let (_, result) =
+        nom::multi::count(crate::parser::components::float, buffer.len() / 4)(buffer).unwrap();
+    result
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::NetCDF;
-    use byteorder::ReadBytesExt;
-
-    fn vec_to_data(buffer: &[u8]) -> Vec<f32> {
-        let mut result = vec![0f32; buffer.len() / 4];
-        std::io::Cursor::new(buffer)
-            .read_f32_into::<byteorder::BigEndian>(&mut result)
-            .unwrap();
-        result
-    }
+    use super::*;
 
     #[test]
     fn test_read_netcdf() {

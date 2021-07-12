@@ -1,7 +1,7 @@
-use headscratcher::NetCDF;
 use headscratcher::error::HeadScratcherError;
+use headscratcher::NetCDF;
 
-fn main() -> Result<(), HeadScratcherError<String>>{
+fn main() -> Result<(), HeadScratcherError<String>> {
     let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
     let mut netcdf = NetCDF::new(filename);
     let mapsize = netcdf.mapsize()?;
@@ -10,7 +10,7 @@ fn main() -> Result<(), HeadScratcherError<String>>{
     let mut buffer = vec![0u8; mapsize * 4];
 
     // coordinate for start position
-    let coord = vec![0usize,0,0];
+    let coord = vec![0usize, 0, 0];
     netcdf.update_buffer("tas".to_string(), &coord, &mut buffer)?;
     Ok(())
 }

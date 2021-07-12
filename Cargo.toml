@@ -9,13 +9,15 @@ edition = "2018"
 [dependencies]
 nom = "6.*"
 clap  = { version = "2.*.*", optional = true }
+byteorder = { version = "1.4.*", optional = true }
 
-[dev-dependencies]
-byteorder = "1.4.*"
+# [dev-dependencies]
+# byteorder = "1.4.*"
 # netcdf = "0.6.*"
 
 [features]
 binary = ["clap"]
+border = ["byteorder"]
 
 [lib]
 name = "headscratcher"
