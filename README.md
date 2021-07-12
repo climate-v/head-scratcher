@@ -5,27 +5,25 @@ Library for reading the header information from netcdf files.
 This library allows to read a netcdf file as a raw byte stream and extract meta information.
 This meta information is then used to optimize memory allocation and memory usage.
 
-## Extracted information
+## Example
 
-### Milestone 1
-- [ ] NetCDF file header
-  - [x] magic
-  - [x] numrecs
-  - [x] dim_list
-  - [ ] gatt_list
-  - [ ] var_list
+```rust
+use headscratcher::NetCDF;
 
-### Milestone 2
-- [ ] Quality of life information
-  - [ ] List of variables
-  - [ ] List of coordinate variables
-  - [ ] For each variable
-    - [ ] Name
-    - [ ] Size
-    - [ ] Offset
-    - [ ] Datatype
-    - [ ] List of coordinates
-    - [ ] is_coordinate
+fn main() {
+    let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
+    let mut netcdf = NetCDF::new(filename);
+    let mapsize = netcdf.mapsize().unwrap();
+
+    // allocate bytes for buffer (mapsize * external size)
+    let mut buffer = vec![0u8; mapsize * 4];
+
+    // coordinate for start position
+    let coord = vec![0usize,0,0];
+    netcdf.update_buffer("tas".to_string(), &coord, &mut buffer).unwrap();
+}
+```
+
 
 ## Resources
 - [Netcdf specification (incl. BNF)](https://cluster.earlham.edu/bccd-ng/testing/mobeen/GALAXSEEHPC/netcdf-4.1.3/man4/netcdf.html#File-Format)
