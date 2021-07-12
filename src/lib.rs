@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use utils::calc_seek;
 pub mod constants_and_types;
-mod error;
+pub mod error;
 pub mod parser;
 mod utils;
 
