@@ -15,15 +15,12 @@ pub struct NetCDF<F: Seek + Read> {
     header: NetCDFHeader,
 }
 
-impl NetCDF<File> {
-    pub fn new(filename: String) -> Self {
-        let fs = File::open(&filename).unwrap();
-        let h = NetCDFHeader::from_file(filename).unwrap();
-        NetCDF {
-            file: fs,
-            header: h,
-        }
+impl<F: Seek + Read> NetCDF<F> {
+    pub fn new_from_file(mut file: F) -> Self {
+        let h = NetCDFHeader::from_file(&mut file).unwrap();
+        NetCDF { file, header: h }
     }
+
     pub fn update_buffer(
         &mut self,
         variable: String,
@@ -77,6 +74,17 @@ impl NetCDF<File> {
                 };
             }
             _ => Err(HeadScratcherError::NoDimensionsInFile),
+        }
+    }
+}
+
+impl NetCDF<File> {
+    pub fn new(filename: String) -> Self {
+        let mut fs = File::open(&filename).unwrap();
+        let h = NetCDFHeader::from_file(&mut fs).unwrap();
+        NetCDF {
+            file: fs,
+            header: h,
         }
     }
 }

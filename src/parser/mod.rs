@@ -58,9 +58,9 @@ impl NetCDFHeader {
         file.seek(SeekFrom::Start(seek_pos.unwrap()))?;
         file.read_exact(buffer)
     }
-    pub fn from_file(filename: String) -> Result<NetCDFHeader, std::io::Error> {
+
+    pub fn from_file<F: Read>(file: &mut F) -> Result<NetCDFHeader, std::io::Error> {
         let mut buf: Vec<u8> = vec![0; BUFFER];
-        let mut file = std::fs::File::open(filename)?;
         let mut head: Vec<u8> = Vec::new();
         loop {
             let count = file.read(&mut buf)?;
@@ -145,39 +145,46 @@ fn clc(vars: &VariableHM, dims: &DimensionHM) -> SeeksHM {
 #[allow(unused_variables, unused_imports)]
 mod tests {
     use super::*;
+    use std::fs::File;
 
     #[test]
     fn file_example_empty() {
         let filename = "assets/empty.nc".to_string();
-        let h = NetCDFHeader::from_file(filename).unwrap();
+        let mut file = File::open(filename).unwrap();
+        let h = NetCDFHeader::from_file(&mut file).unwrap();
     }
     #[test]
     fn file_example_small() {
         let filename = "assets/small.nc".to_string();
-        let h = NetCDFHeader::from_file(filename).unwrap();
+        let mut file = File::open(filename).unwrap();
+        let h = NetCDFHeader::from_file(&mut file).unwrap();
     }
 
     #[test]
     fn file_example_compressible() {
         let filename = "assets/testrh.nc".to_string();
-        let h = NetCDFHeader::from_file(filename).unwrap();
+        let mut file = File::open(filename).unwrap();
+        let h = NetCDFHeader::from_file(&mut file).unwrap();
     }
 
     #[test]
     fn file_nc3_classic() {
         let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
-        let h = NetCDFHeader::from_file(filename).unwrap();
+        let mut file = File::open(filename).unwrap();
+        let h = NetCDFHeader::from_file(&mut file).unwrap();
     }
     #[test]
     fn file_nc3_64offset() {
         let filename = "assets/sresa1b_ncar_ccsm3-example.3_nc64.nc".to_string();
-        let h = NetCDFHeader::from_file(filename).unwrap();
+        let mut file = File::open(filename).unwrap();
+        let h = NetCDFHeader::from_file(&mut file).unwrap();
     }
 
     #[test]
     fn test_seeks() {
         let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
-        let header = NetCDFHeader::from_file(filename).unwrap();
+        let mut file = File::open(filename).unwrap();
+        let header = NetCDFHeader::from_file(&mut file).unwrap();
         let seeks = calculate_seeks(&header.vars, &header.dims).unwrap();
         let expected = vec![
             ("plev".to_string(), vec![1usize]),
