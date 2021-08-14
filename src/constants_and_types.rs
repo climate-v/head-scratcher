@@ -1,6 +1,5 @@
 //! Constants and types
 #![allow(non_camel_case_types, unused_attributes)]
-#![rustfmt::skip]
 
 // Constants
 pub const STREAMING:    u32 = 0xFF_FF_FF_FF;
