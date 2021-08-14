@@ -39,6 +39,11 @@ impl<F: Seek + Read> NetCDF<F> {
         let ok = self.file.read_exact(buffer)?;
         Ok(ok)
     }
+
+    pub fn header(&self) -> &NetCDFHeader {
+        &self.header
+    }
+
     pub fn mapsize(&self) -> Result<usize, HeadScratcherError<String>> {
         match &self.header.dims {
             Some(dims) => {

@@ -47,6 +47,14 @@ impl NetCDFVariable {
             begin,
         }
     }
+
+    pub fn length(&self) -> usize {
+        self.vsize / self.nc_type.extsize()
+    }
+
+    pub fn attributes(&self) -> &Option<AttributeHM> {
+        &self.attributes
+    }
 }
 
 /// Parse a single NetCDF variable [combined]
@@ -140,6 +148,13 @@ impl NetCDFAttribute {
             data: value,
         }
     }
+
+    pub fn as_string(&self) -> Option<String> {
+        match &self.data {
+            NetCDFTypeInstance::STRING(content) => Some(content.clone()),
+            _ => None,
+        }
+    }
 }
 
 /// Parse a single NetCDF attribute [combined]
@@ -176,6 +191,10 @@ impl NetCDFDimension {
     /// Create new NetCDF dimension
     pub fn new(name: String, length: usize) -> Self {
         NetCDFDimension { name, length }
+    }
+
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 }
 
