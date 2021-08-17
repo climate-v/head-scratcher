@@ -49,6 +49,15 @@ impl<F: Seek + Read> NetCDF<F> {
     pub fn mapsize(&self) -> Result<usize, HeadScratcherError<String>> {
         match &self.header.dims {
             Some(dims) => {
+                let ncells = crate::utils::get_coordinate_dim_id(
+                    &dims,
+                    crate::constants_and_types::NCELLS_CANDIDATES,
+                );
+
+                if let Ok(ncells) = ncells {
+                    return Ok(dims.get(&ncells).unwrap().length);
+                }
+
                 let lon = crate::utils::get_coordinate_dim_id(
                     &dims,
                     crate::constants_and_types::LONGITUDE_CANDIDATES,
