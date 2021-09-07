@@ -9,6 +9,8 @@ use nom::error::ErrorKind as NomErrorKind;
 pub enum HeadScratcherError<I> {
     /// Placeholder error
     EmptyError,
+    /// Invalid NetCDF file
+    InvalidFile,
     /// NetCDF version is not correct
     UnsupportedNetCDFVersion,
     /// Type of list is unknown
@@ -47,6 +49,27 @@ impl<I> nom::error::ParseError<I> for HeadScratcherError<I> {
 impl<I> From<std::io::Error> for HeadScratcherError<I> {
     fn from(err: std::io::Error) -> Self {
         HeadScratcherError::IOError(err.kind())
+    }
+}
+
+impl<I> HeadScratcherError<I> {
+    pub fn cast<T>(&self) -> Option<HeadScratcherError<T>> {
+        match &self {
+            HeadScratcherError::EmptyError => Some(HeadScratcherError::EmptyError),
+            HeadScratcherError::InvalidFile => Some(HeadScratcherError::InvalidFile),
+            HeadScratcherError::UnsupportedNetCDFVersion => Some(HeadScratcherError::UnsupportedNetCDFVersion),
+            HeadScratcherError::UnsupportedListType(list) => Some(HeadScratcherError::UnsupportedListType(*list)),
+            HeadScratcherError::NonZeroValue(val) => Some(HeadScratcherError::NonZeroValue(*val)),
+            HeadScratcherError::UnsupportedZeroListType => Some(HeadScratcherError::UnsupportedZeroListType),
+            HeadScratcherError::UTF8error => Some(HeadScratcherError::UTF8error),
+            HeadScratcherError::UnknownNetCDFType(tpe) => Some(HeadScratcherError::UnknownNetCDFType(*tpe)),
+            HeadScratcherError::NomError(_, _) => None,
+            HeadScratcherError::IOError(err) => Some(HeadScratcherError::IOError(err.clone())),
+            HeadScratcherError::NoVariablesInFile => Some(HeadScratcherError::NoVariablesInFile),
+            HeadScratcherError::NoDimensionsInFile => Some(HeadScratcherError::NoDimensionsInFile),
+            HeadScratcherError::VariableNotFound(var) => Some(HeadScratcherError::VariableNotFound(var.clone())),
+            HeadScratcherError::CouldNotFindDimension(dim) => Some(HeadScratcherError::CouldNotFindDimension(dim.clone())),
+        }
     }
 }
 
