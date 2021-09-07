@@ -59,7 +59,7 @@ impl NetCDFHeader {
         file.read_exact(buffer)
     }
 
-    pub fn from_file<F: Read>(file: &mut F) -> Result<NetCDFHeader, std::io::Error> {
+    pub fn from_file<F: Read>(file: &mut F) -> Result<NetCDFHeader, HSE<String>> {
         let mut buf: Vec<u8> = vec![0; BUFFER];
         let mut head: Vec<u8> = Vec::new();
         loop {
@@ -68,6 +68,18 @@ impl NetCDFHeader {
             match header(&head) {
                 Ok((_, h)) => return Ok(h),
                 Err(nom::Err::Incomplete(nom::Needed::Size(_))) => continue,
+                Err(nom::Err::Failure(err)) => {
+                    return match err {
+                        HSE::NomError(_, _) => Err(HSE::InvalidFile),
+                        e => Err(e.cast().unwrap()) // cannot be None as the only case this can happen is covered above
+                    }
+                },
+                Err(nom::Err::Error(err)) => {
+                    return match err {
+                        HSE::NomError(_, _) => Err(HSE::InvalidFile),
+                        e => Err(e.cast().unwrap()) // cannot be None as the only case this can happen is covered above
+                    }
+                },
                 Err(err) => panic!("Other error: {:?}", err),
             }
         }

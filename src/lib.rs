@@ -18,9 +18,9 @@ pub struct NetCDF<F: Seek + Read> {
 }
 
 impl<F: Seek + Read> NetCDF<F> {
-    pub fn new_from_file(mut file: F) -> Self {
-        let h = NetCDFHeader::from_file(&mut file).unwrap();
-        NetCDF { file, header: h }
+    pub fn new_from_file(mut file: F) -> Result<Self, HeadScratcherError<String>> {
+        let h = NetCDFHeader::from_file(&mut file)?;
+        Ok(NetCDF { file, header: h })
     }
 
     pub fn update_buffer(
@@ -95,13 +95,13 @@ impl<F: Seek + Read> NetCDF<F> {
 }
 
 impl NetCDF<File> {
-    pub fn new(filename: String) -> Self {
-        let mut fs = File::open(&filename).unwrap();
-        let h = NetCDFHeader::from_file(&mut fs).unwrap();
-        NetCDF {
+    pub fn new(filename: String) -> Result<Self, HeadScratcherError<String>> {
+        let mut fs = File::open(&filename)?;
+        let h = NetCDFHeader::from_file(&mut fs)?;
+        Ok(NetCDF {
             file: fs,
             header: h,
-        }
+        })
     }
 }
 
@@ -131,7 +131,7 @@ mod tests {
     #[test]
     fn test_read_netcdf() {
         let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
-        let mut netcdf = NetCDF::new(filename);
+        let mut netcdf = NetCDF::new(filename).unwrap();
         let mut buffer = vec![0u8; 4];
         netcdf
             .update_buffer("tas".to_string(), &vec![0, 0, 0], &mut buffer)
