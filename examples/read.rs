@@ -3,7 +3,7 @@ use headscratcher::NetCDF;
 
 fn main() -> Result<(), HeadScratcherError<String>> {
     let filename = "assets/sresa1b_ncar_ccsm3-example.nc".to_string();
-    let mut netcdf = NetCDF::new(filename);
+    let mut netcdf = NetCDF::new(filename)?;
     let mapsize = netcdf.mapsize()?;
 
     // allocate bytes for buffer (mapsize * external size)
